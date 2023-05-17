@@ -11,7 +11,7 @@ process.env.DIST = join(__dirname, '../dist')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public')
 
 import { join } from 'path'
-import { app, BrowserWindow, Session } from 'electron'
+import { app, BrowserWindow, ipcMain, Session } from 'electron'
 
 let win: BrowserWindow | null
 let session: Session;
@@ -25,7 +25,7 @@ function createWindow() {
     icon: join(process.env.PUBLIC, 'logo.svg'),
     autoHideMenuBar: true,
     webPreferences: {
-      contextIsolation: false,
+      contextIsolation: true,
       nodeIntegration: true,
       preload,
     },
@@ -52,7 +52,14 @@ function createWindow() {
             callback(true);
         }
     }
-);
+  );
+
+  ipcMain.on("boo", (a, b, c) => { // browser to node
+    console.log(c)
+    setTimeout(() => {
+      win?.webContents.send("wah", c) // node to browser
+    }, 1000)
+  })
 }
 
 app.on('window-all-closed', () => {

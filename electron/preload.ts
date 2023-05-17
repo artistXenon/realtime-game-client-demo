@@ -1,3 +1,5 @@
+import { IpcRendererEvent, contextBridge, ipcRenderer } from "electron";
+
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
     if (condition.includes(document.readyState)) {
@@ -90,3 +92,10 @@ window.onmessage = ev => {
 }
 
 setTimeout(removeLoading, 4999)
+
+// create communication interface to browser
+contextBridge.exposeInMainWorld("DAO", {
+  showTime: (c: number) => ipcRenderer.send("boo", "arg1", c), // browser to node
+  showedTime: (c: (e: IpcRendererEvent, a: number) => void) => ipcRenderer.on("wah", c) // node to browser
+
+})
