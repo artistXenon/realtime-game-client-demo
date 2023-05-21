@@ -12,10 +12,10 @@ socket.on("listening", () => {
 socket.on("connect", () => { 
     // socket is connected
     setInterval(_ => {
-        const msg = Buffer.from('counter is ' + counter++);
+        const msg = Buffer.from('join!' + JSON.stringify({ Id: 5230, GameId: 5430, Name: "Ailre" }));
         // console.log("buffer size: " + msg.length);
         socket.send(msg);
-    }, 100);
+    }, 2000);
 
 });
 
