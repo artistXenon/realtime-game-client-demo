@@ -5,22 +5,49 @@ const socket = dgram.createSocket('udp4');
 let counter = 0;
 
 
+function generateMsg(event, id, hash, body) {
+    const b = Buffer.from(`${event}!${id}!${hash}!\n${body}`);
+    if (b.length > 1024) {
+        console.log("exceed!!!");
+        return null;
+    }
+    return b;
+}
+
+
 socket.on("listening", () => { 
     // socket is made
 });
 
 socket.on("connect", () => { 
     // socket is connected
-    setInterval(_ => {
-        const msg = Buffer.from('join!' + JSON.stringify({ Id: 5230, GameId: 5430, Name: "Ailre" }));
-        // console.log("buffer size: " + msg.length);
-        socket.send(msg);
-    }, 2000);
-
+    let sb = generateMsg("join", 5230, "", JSON.stringify({ GameId: "1q2w3e", Name: "Ailre" }))
+    socket.send(sb);
 });
 
 socket.on("message", (msg, info) => {
-    console.log(msg.toString());
+    const m = msg.toString()
+    if (m === "ok") {
+        setInterval(_ => {
+            counter = Date.now();
+            let sb = generateMsg("ping", 5230, "", counter);
+            socket.send(sb);
+        }, 2000)
+        return
+    }
+    let r = m.split("!")
+    if (r[0] === 'ping') {
+        const now = Date.now();
+        const ping = (now - counter) / 2;
+        const sendDelay = r[1] - now; // offset - ping
+        const receiveDelay = Number(r[2]); // offset + ping
+        const offset = (sendDelay + receiveDelay) / 2;
+        console.log("ping:", ping, "server-client time offset:", offset);
+        let sb = generateMsg("pong", 5230, "", JSON.stringify({ Ping: ping, Offset: offset, SendDelay: sendDelay }));
+        socket.send(sb);
+        return
+    }
+
 });
 
 
