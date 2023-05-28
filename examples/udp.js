@@ -21,7 +21,7 @@ socket.on("listening", () => {
 
 socket.on("connect", () => { 
     // socket is connected
-    let sb = generateMsg("join", 5230, "", JSON.stringify({ GameId: "1q2w3e", Name: "Ailre" }))
+    let sb = generateMsg("join", 5230, "", JSON.stringify({ LobbyId: "1q2w3e", Name: "Ailre" }))
     socket.send(sb);
 });
 
@@ -38,9 +38,9 @@ socket.on("message", (msg, info) => {
     let r = m.split("!")
     if (r[0] === 'ping') {
         const now = Date.now();
-        const ping = (now - counter) / 2;
-        const sendDelay = r[1] - now; // offset - ping
-        const receiveDelay = Number(r[2]); // offset + ping
+        const ping = now - counter;
+        const sendDelay = r[1] - now; // offset - half_ping
+        const receiveDelay = Number(r[2]); // offset + half_ping
         const offset = (sendDelay + receiveDelay) / 2;
         console.log("ping:", ping, "server-client time offset:", offset);
         let sb = generateMsg("pong", 5230, "", JSON.stringify({ Ping: ping, Offset: offset, SendDelay: sendDelay }));
