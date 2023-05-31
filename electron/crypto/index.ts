@@ -1,4 +1,4 @@
-import { scryptSync, createCipheriv, createDecipheriv } from "crypto";
+import { scryptSync, createCipheriv, createDecipheriv, createHash } from "crypto";
 
 const algorithm = 'aes-192-cbc';
 const iv = Buffer.alloc(16, 0);
@@ -13,7 +13,7 @@ export function encrypt(password: string, plain: string): Promise<string> {
         encrypted += cipher.final('hex');
         resolve(encrypted);
     });    
-};
+}
 
 export function decrypt(password: string, code: string): Promise<string> {
     return new Promise((resolve) => {
@@ -23,4 +23,11 @@ export function decrypt(password: string, code: string): Promise<string> {
         decrypted += decipher.final('utf8');
         resolve(decrypted);
     });
+}
+
+export function hashCheck(values: string[], hash: string) {
+    values.sort();
+    const plain = values.join('');
+    const generated_hash = createHash('sha256').update(plain).digest('base64');
+    return generated_hash === hash;
 }

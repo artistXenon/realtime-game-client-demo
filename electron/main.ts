@@ -47,6 +47,7 @@ app.whenReady().then(() => {
       }
     }
     if (!url.startsWith("https://accounts.google.com/")) {
+      event.preventDefault();
       console.log(url);
     }    
   });
