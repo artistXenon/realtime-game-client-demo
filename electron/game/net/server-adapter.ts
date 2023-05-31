@@ -6,7 +6,7 @@ export default class ServerAdapter {
 
     private pingLoop: PingLoop | undefined;
 
-    private tickRate: number = 1000; // / 30
+    // private tickRate: number = 1000; // / 30
 
     constructor(addr: string, port: number) {
         this.connection = dgram.createSocket('udp4');
@@ -20,7 +20,7 @@ export default class ServerAdapter {
             this.onConnect();
         });
         
-        this.connection.on("message", (msg, info) => {
+        this.connection.on("message", (msg, _) => { // info
             // todo: handle wrapping info: tick number, reqeust hash
             const msgStr = msg.toString();
             if (msgStr[0] === '!') {
@@ -42,6 +42,7 @@ export default class ServerAdapter {
         });
         
         this.connection.on("error", (err) => {
+            console.log(err);
             // on error. what kind?
         });
         
@@ -72,7 +73,7 @@ export default class ServerAdapter {
     }
 
     private static generateHash(body: string) {
-        return ""; //TODO: generate hash from sign cert
+        return "" + body; //TODO: generate hash from sign cert
 
     }
 }
