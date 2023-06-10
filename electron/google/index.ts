@@ -99,7 +99,7 @@ export default class GoogleCredential {
             const error_code = (<any>e).response?.status;
             if (error_code == null) {
                 // this is axios
-                console.log(e);
+                console.log((<any>e).response);
             }
             fs.unlinkSync(credential_file);
             return false;

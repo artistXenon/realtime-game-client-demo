@@ -13,10 +13,7 @@ h1.innerText = "";
 // listen to node
 (<any>window).electronIPC.showedTime((e: IpcRendererEvent, c: number) => {
   console.log(c + 1);
-  setTimeout(() => {
-    // send to node
-    (<any>window).electronIPC.showTime(c + 1)
-  }, 1000)
+  setTimeout(() => (<any>window).electronIPC.showTime(c + 1), 500);
 });
 
 setTimeout(() => {
@@ -24,5 +21,3 @@ setTimeout(() => {
   (<any>window).electronIPC.showTime(0)
 }, 1000);
 
-
-postMessage({ payload: 'removeLoading' }, '*');

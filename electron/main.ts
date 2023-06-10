@@ -31,7 +31,7 @@ app.whenReady().then(() => {
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    win?.webContents.send('main-process-message', (new Date).toLocaleString());
   });
 
   win.webContents.on('will-redirect', async function (event, url) {
@@ -39,7 +39,7 @@ app.whenReady().then(() => {
       event.preventDefault();
       const isCode = await googleCredential.onCode(event, url, win!);
       if (isCode) {
-        win?.loadFile(join(process.env.DIST, 'index.html'))
+        loadGame(win!);
         return;
       } else {
         googleCredential.promptLogin(win!);
@@ -58,7 +58,7 @@ app.whenReady().then(() => {
         if (!done) {
           googleCredential.promptLogin(win!);
         } else {
-          win?.loadFile(join(process.env.DIST, 'index.html'));
+          loadGame(win!);
         }
       });
   } else {
@@ -71,11 +71,20 @@ app.whenReady().then(() => {
 
   ipcMain.on("boo", (a, b, c) => { // browser to node
     console.log(c);
-    setTimeout(() => {
-      win?.webContents.send("wah", c); // node to browser
-    }, 1000)
+    setTimeout(() => win?.webContents.send("wah", c), 500); // node to browser
   });
 });
+
+function loadGame(win: BrowserWindow) {
+  if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
+    win.loadURL(process.env.VITE_DEV_SERVER_URL);
+    // Open devTool if the app is not packaged
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile(join(process.env.DIST, 'index.html'));
+  }
+}
+
 
 app.on('web-contents-created', (event, contents) => {
   contents.setWindowOpenHandler(({ url }) => {
