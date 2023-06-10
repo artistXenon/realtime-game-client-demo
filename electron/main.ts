@@ -46,7 +46,7 @@ app.whenReady().then(() => {
         return;
       }
     }
-    if (!url.startsWith("https://accounts.google.com/")) {
+    if (!GoogleCredential.isGoogleAccountDomain(url)) {
       event.preventDefault();
       console.log(url);
     }    
@@ -65,7 +65,8 @@ app.whenReady().then(() => {
     googleCredential.promptLogin(win!);
   }
   
-  session = win.webContents.session
+  session = win.webContents.session;
+  // session.clearStorageData({ origin: "https://accounts.google.com/" });
   session.setPermissionRequestHandler((webContents, permission, callback, details) => { callback(permissions.indexOf(permission) !== -1); });
 
   ipcMain.on("boo", (a, b, c) => { // browser to node
