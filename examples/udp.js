@@ -4,7 +4,6 @@ const socket = dgram.createSocket('udp4');
 
 let counter = 0;
 
-
 function generateMsg(event, id, hash, body) {
     const b = Buffer.from(`${event}!${id}!${hash}!\n${body}`);
     if (b.length > 1024) {
@@ -32,7 +31,7 @@ socket.on("message", (msg, info) => {
             counter = Date.now();
             let sb = generateMsg("ping", 5230, "", counter);
             socket.send(sb);
-        }, 2000)
+        }, 10)
         return
     }
     let r = m.split("!")
@@ -49,7 +48,6 @@ socket.on("message", (msg, info) => {
     }
 
 });
-
 
 socket.on("error", (err) => {
     console.log(err)

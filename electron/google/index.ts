@@ -8,7 +8,7 @@ import { encrypt } from "../crypto";
 const credential_file = "./credential.json";
 
 
-export default class GoogleCredential {
+export class GoogleCredential {
     private static instance: GoogleCredential;
 
     private static readonly match_host = "http://localhost:5002"; // ??

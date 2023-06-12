@@ -2,12 +2,13 @@ process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
 
 import { join } from 'path';
-import { app, BrowserWindow, ipcMain, Session, shell } from 'electron';
+import { app, BrowserWindow, Session, shell } from 'electron';
 
 import permissions from './permissions';
 import { SharedProperties } from './shared-properties';
 
-import GoogleCredential from './google';
+import { GoogleCredential } from './google';
+import { IPCTerminal } from './communication';
 
 let win: BrowserWindow | null;
 let session: Session;
@@ -31,19 +32,17 @@ app.whenReady().then(() => {
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString());
+    win?.webContents.send('main-process-message', (new Date()).toLocaleString());
   });
 
-  win.webContents.on('will-redirect', async function (event, url) {
+  win.webContents.on('will-redirect', async (event, url) => {
     if (url.startsWith(GoogleCredential.code_endpoint)) {
       event.preventDefault();
       const isCode = await googleCredential.onCode(event, url, win!);
       if (isCode) {
-        loadGame(win!);
-        return;
+        return loadGame(win!);
       } else {
-        googleCredential.promptLogin(win!);
-        return;
+        return googleCredential.promptLogin(win!);
       }
     }
     if (!GoogleCredential.isGoogleAccountDomain(url)) {
@@ -67,9 +66,11 @@ app.whenReady().then(() => {
   
   session = win.webContents.session;
   // session.clearStorageData({ origin: "https://accounts.google.com/" });
-  session.setPermissionRequestHandler((webContents, permission, callback, details) => { callback(permissions.indexOf(permission) !== -1); });
+  session.setPermissionRequestHandler((webContents, permission, callback, details) => { 
+    callback(permissions.indexOf(permission) !== -1); 
+  });
 
-  ipcMain.on("boo", (a, b, c) => { // browser to node
+  IPCTerminal.get().addListener("boo", (a, b, c) => { // browser to node
     console.log(c);
     setTimeout(() => win?.webContents.send("wah", c), 500); // node to browser
   });
@@ -85,12 +86,11 @@ function loadGame(win: BrowserWindow) {
   }
 }
 
-
 app.on('web-contents-created', (event, contents) => {
   contents.setWindowOpenHandler(({ url }) => {
     setImmediate(() => {
       shell.openExternal(url);
-    })
+    });
     return { action: 'deny' };
   })
 });
