@@ -1,4 +1,5 @@
 import { scryptSync, createCipheriv, createDecipheriv, createHash } from "crypto";
+import CRC32 from "crc-32";
 
 const algorithm = 'aes-192-cbc';
 const iv = Buffer.alloc(16, 0);
@@ -30,4 +31,8 @@ export function hashCheck(values: string[], hash: string) {
     const plain = values.join('');
     const generated_hash = createHash('sha256').update(plain).digest('base64');
     return generated_hash === hash;
+}
+
+export function generateCRC32(buf: Buffer) {
+    return CRC32.buf(buf, 0);
 }
