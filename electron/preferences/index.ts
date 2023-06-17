@@ -3,8 +3,12 @@ import fs from "fs";
 const config_file = "./config.json";
 
 export default class Preferences {
-    public static readonly i = new Preferences();
-    private constructor() {
+    public saveLogin: boolean = true;
+
+    public showName: boolean = true;
+    public localName: string = "Ailre"; // TODO: replace w/ blank string later
+
+    constructor() {
         if (!fs.existsSync(config_file)) {
             return;
         }
@@ -22,11 +26,6 @@ export default class Preferences {
 
     }
 
-    public saveLogin: boolean = true;
-
-    public showName: boolean = true;
-
-    public localName: string = "";
 
 
     // in pub or hidden name private match, player name will be taco 0000

@@ -1,6 +1,6 @@
 import dgram from "dgram";
 import { generateCRC32 } from "../../crypto";
-import State from "./state";
+import { SharedProperties } from "../../shared-properties";
 
 export type UDPEvent = "listening" | "connect" | "message" | "error" | "close";
 export type UDPCommand = number;
@@ -23,12 +23,11 @@ export class UDPTerminal {
 
     private callbacks: Map<UDPEvent, Set<(...args: any[]) => void>>;
 
+    private isConnected: boolean = false;
+
     public readonly connection: dgram.Socket;
 
-    public userState: State;
-
-    constructor(address: string, port: number, userState: State) {
-        this.userState = userState;
+    constructor(address: string, port: number) {
         this.callbacks = new Map();
         this.callbacks.set(UDPTerminal.EVENT_LISTENING, new Set());
         this.callbacks.set(UDPTerminal.EVENT_CONNECT, new Set());
@@ -46,10 +45,7 @@ export class UDPTerminal {
         });
 
         this.connection.on(UDPTerminal.EVENT_CONNECT, () => { 
-            const callbacks = this.callbacks.get(UDPTerminal.EVENT_CONNECT)!;
-            for (const callback of callbacks) {
-                callback();
-            }
+            this.isConnected = true;
         });
 
         this.connection.on(UDPTerminal.EVENT_MESSAGE, (msg: Buffer, info) => {
@@ -90,32 +86,54 @@ export class UDPTerminal {
         return this;
     }
 
-    public send(command: UDPCommand, body: Buffer) {
-        let buffers: Buffer[] = [];
-        let buf: Buffer;
-        buf = Buffer.allocUnsafe(1 + 10);
+    public async send(command: UDPCommand, body: Buffer) {
+        await new Promise<void>((res, rej) => {
+            const itv = setInterval(_ => {
+                if (this.isConnected) {
+                    clearInterval(itv);
+                    res();
+                }
+            }, 10);
+        });
 
+        if (!SharedProperties.GoogleCredential.isValidated) {
+            throw new Error("Google credential must be validated before UDP communication.");
+        }
         // command[1]
-        buf.writeUInt8(command);
+        const commandBuffer = Buffer.allocUnsafe(1);
+        commandBuffer.writeUInt8(command);
 
         // userid[10]
-        buf.write(this.userState.UserIDinHEX, 'hex');
-        buffers.push(buf);
+        const userBuffer = SharedProperties.UserIDBuffer!;
 
         // lobby[5]
-        if (command > UDPTerminal.COMMAND_WITH_LOBBY) {
-            buf = Buffer.from(this.userState.LobbyId);
-            buffers.push(buf);
-        }
-
-        // hash[4]
-        buf = Buffer.allocUnsafe(4);
-        buf.writeInt32BE(generateCRC32(body));
-        buffers.push(buf);
+        const lobbyBuffer = Buffer.from(SharedProperties.Lobby.ID);
 
         // body[:]
-        buffers.push(body);
-        buf = Buffer.concat(buffers);
-        this.connection.send(buf);
+        const bodyBuffer = Buffer.concat([
+            commandBuffer, userBuffer, lobbyBuffer, body
+        ]);
+
+        // hash[4]
+        const skipHash = command === UDPTerminal.COMMAND_PING || command === UDPTerminal.COMMAND_PONG;
+        const hashBuffer = Buffer.allocUnsafe(4);
+        if (!skipHash) {
+            const sessionKey = SharedProperties.SessionKey!;
+            const signedBodyBuffer = Buffer.concat([sessionKey, bodyBuffer]);
+            hashBuffer.writeInt32BE(generateCRC32(signedBodyBuffer));
+        }        
+
+        const messageBuffer = Buffer.concat([hashBuffer, bodyBuffer]);
+
+        this.connection.send(messageBuffer);
     }
+    /**
+     * message format 
+     * 
+     * hash(all of the following + online secret) 4
+     * command 1
+     * uid 10
+     * lobbyid 5
+     * [ body ~ ]
+     */
 };

@@ -11,7 +11,7 @@ const credential_file = "./credential.json";
 export class GoogleCredential {
     private static instance: GoogleCredential;
 
-    private static readonly match_host = "http://localhost:5002"; // ??
+    public static readonly match_host = "http://localhost:5002"; // TODO: move to somewhere else as a config??
 
     private static readonly token_endpoint = GoogleCredential.match_host + "/token"; // ??
 
@@ -41,6 +41,14 @@ export class GoogleCredential {
         } catch (ignore) {
             fs.unlinkSync(credential_file);
         }
+    }
+
+    public get ID() {
+        return this.id;
+    }
+
+    public get SessionKey() {
+        return this.session_key;
     }
 
     public get isLocalTokenPrepared(): boolean {

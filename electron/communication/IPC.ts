@@ -1,18 +1,18 @@
-import { IpcMainEvent, ipcMain } from 'electron';
+import { IpcMainEvent, WebContents, ipcMain } from 'electron';
 
 export class IPCTerminal {
-    private static instance: IPCTerminal;
-    private constructor() {}
+    private web: WebContents;
 
-    public static get() {
-        if (IPCTerminal.instance === undefined) {
-            IPCTerminal.instance = new IPCTerminal();
-        }
-        return IPCTerminal.instance;
+    constructor(web: WebContents) {
+        this.web = web;
     }
 
     public addListener(channel: string, listener: (event: IpcMainEvent, ...args: any[]) => void) {
         ipcMain.on(channel, listener);
         return this;
+    }
+
+    public send(channel: string, ...args: any[]) {
+        this.web.send(channel, ...args);
     }
 };

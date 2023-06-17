@@ -2,18 +2,17 @@ process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
 
 import { join } from 'path';
-import { app, BrowserWindow, Session, shell } from 'electron';
+import { app, BrowserWindow, IpcMainEvent, Session, shell } from 'electron';
 
 import permissions from './permissions';
 import { SharedProperties } from './shared-properties';
 
 import { GoogleCredential } from './google';
-import { IPCTerminal } from './communication';
+import { IPCTerminal, UDPTerminal } from './communication';
+import { Lobby } from './application/lobby';
 
 let win: BrowserWindow | null;
 let session: Session;
-
-const googleCredential = new GoogleCredential();
 
 app.whenReady().then(() => {
   win = new BrowserWindow({
@@ -38,11 +37,11 @@ app.whenReady().then(() => {
   win.webContents.on('will-redirect', async (event, url) => {
     if (url.startsWith(GoogleCredential.code_endpoint)) {
       event.preventDefault();
-      const isCode = await googleCredential.onCode(event, url, win!);
+      const isCode = await SharedProperties.GoogleCredential.onCode(event, url, win!);
       if (isCode) {
         return loadGame(win!);
       } else {
-        return googleCredential.promptLogin(win!);
+        return SharedProperties.GoogleCredential.promptLogin(win!);
       }
     }
     if (!GoogleCredential.isGoogleAccountDomain(url)) {
@@ -51,17 +50,17 @@ app.whenReady().then(() => {
     }    
   });
 
-  if (googleCredential.isLocalTokenPrepared) {
-    googleCredential.refreshLocalToken()
+  if (SharedProperties.GoogleCredential.isLocalTokenPrepared) {
+    SharedProperties.GoogleCredential.refreshLocalToken()
       .then((done) => {
         if (!done) {
-          googleCredential.promptLogin(win!);
+          SharedProperties.GoogleCredential.promptLogin(win!);
         } else {
           loadGame(win!);
         }
       });
   } else {
-    googleCredential.promptLogin(win!);
+    SharedProperties.GoogleCredential.promptLogin(win!);
   }
   
   session = win.webContents.session;
@@ -70,10 +69,22 @@ app.whenReady().then(() => {
     callback(permissions.indexOf(permission) !== -1); 
   });
 
-  IPCTerminal.get().addListener("boo", (a, b, c) => { // browser to node
-    console.log(c);
-    setTimeout(() => win?.webContents.send("wah", c), 500); // node to browser
-  });
+  SharedProperties.createIPCTerminal(win!.webContents)
+    .addListener("boo", (a, b, c) => { // browser to node
+      console.log(c);
+      setTimeout(() => win?.webContents.send("wah", c), 500); // node to browser
+    })
+    .addListener("join", async (event: IpcMainEvent, isPrivate: boolean, lobbyID: string = "") => {
+      // TODO: request match server for join w/ given info
+      // will receive server address, port, matchid etc
+      const lobby = await Lobby.GetLobby(isPrivate, lobbyID);
+      if (lobby === undefined) {
+        console.log("join failure: can not create lobby");
+        return;
+      }
+      SharedProperties.Lobby = lobby; 
+      lobby.join();
+    });
 });
 
 function loadGame(win: BrowserWindow) {

@@ -10,14 +10,23 @@ const h1 = document.querySelector<HTMLDivElement>('h1')!;
 
 h1.innerText = "";
 
+const ipcInterface = (<any>window).electronIPC;
+
 // listen to node
-(<any>window).electronIPC.showedTime((e: IpcRendererEvent, c: number) => {
+ipcInterface.showedTime((e: IpcRendererEvent, c: number) => {
   console.log(c + 1);
-  setTimeout(() => (<any>window).electronIPC.showTime(c + 1), 500);
+  setTimeout(() => ipcInterface.showTime(c + 1), 500);
+});
+
+
+ipcInterface.onError((e: IpcRendererEvent, err: string) => {
+  console.log(err);
 });
 
 setTimeout(() => {
   // invoke communication loop
-  (<any>window).electronIPC.showTime(0)
-}, 1000);
+  // ipcInterface.showTime(0)
+  ipcInterface.joinMatch(false); // join public match
+}, 2000);
 
+//

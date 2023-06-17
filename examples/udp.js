@@ -13,14 +13,13 @@ function generateMsg(event, id, hash, body) {
     return b;
 }
 
-
 socket.on("listening", () => { 
     // socket is made
 });
 
 socket.on("connect", () => { 
     // socket is connected
-    let sb = generateMsg("join", 5230, "", JSON.stringify({ LobbyId: "1q2w3e", Name: "Ailre" }))
+    let sb = generateMsg("join", 5230, "", JSON.stringify({ LobbyId: "1q2w3", Name: "Ailre" }))
     socket.send(sb);
 });
 
