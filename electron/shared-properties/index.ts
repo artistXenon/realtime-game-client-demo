@@ -1,6 +1,6 @@
 import { BrowserWindow, WebContents } from "electron";
 import { GoogleCredential } from "../google";
-import { IPCTerminal, UDPTerminal } from "../communication";
+import { IPCTerminal, UDPTerminal, TCPTerminal } from "../communication";
 import Preferences from "../preferences";
 import { Lobby } from "../application/lobby";
 
@@ -12,6 +12,8 @@ export class SharedProperties {
   private static googleCredential: GoogleCredential = new GoogleCredential();
 
   public static BrowserWindow: BrowserWindow;
+
+  private static tcpTerminal: TCPTerminal;
 
   private static udpTerminal: UDPTerminal;
 
@@ -30,6 +32,11 @@ export class SharedProperties {
   public static get GoogleCredential() {
     return this.googleCredential;
   }
+  
+  public static get TCPTerminal() {
+    return this.tcpTerminal;
+  }
+
   public static get UDPTerminal() {
     return this.udpTerminal;
   }
@@ -59,8 +66,13 @@ export class SharedProperties {
     this.lobby = lobby;
   }
 
+  public static createTCPTerminal(address: string, port: number) {
+    this.tcpTerminal = new TCPTerminal(address, port);
+    return this.tcpTerminal;
+  }
+
   public static createUDPTerminal(address: string, port: number) {
-    if (this.udpTerminal != null) {
+    if (this.udpTerminal != null && false) {
       try {
         const prevRemote = this.udpTerminal.connection.remoteAddress()
         if (prevRemote.address === address && prevRemote.port === port) {

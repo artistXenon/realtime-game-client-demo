@@ -8,7 +8,6 @@ import permissions from './permissions';
 import { SharedProperties } from './shared-properties';
 
 import { GoogleCredential } from './google';
-import { IPCTerminal, UDPTerminal } from './communication';
 import { Lobby } from './application/lobby';
 
 let win: BrowserWindow | null;

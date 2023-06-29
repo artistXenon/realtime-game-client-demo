@@ -1,100 +1,96 @@
-import { UDPTerminal } from "../communication";
+import { UDPApplication, UDPTerminal } from "../communication";
 
-export class PingMeasurement {
-    private maxPingCount = 5;
 
-    private maxBufferSize = 5;
+/**
+ * @ message format
+ * ping >
+ * clientTime
+ * sendDelay
+ * 
+ * pong <
+ * serverTime
+ * receiveDelay 
+ */
 
-    private pingTimer: NodeJS.Timer | undefined;
+type PingSnapshot = {
+    count: number;
+    pingedTime: number;
+};
 
-    private udpTerminal: UDPTerminal;
+export class PingApp extends UDPApplication<PingSnapshot> {
+    protected pings: number[] = [];
 
-    private lastPing = 0;
-
-    private pingCount = 0;
-
-    private pings: number[] = [];
-
-    constructor(udpterminal: UDPTerminal) {
-        this.udpTerminal = udpterminal;
-
-        const pingListener = (command: Buffer, msg: Buffer) => {
-            if (UDPTerminal.COMMAND_PING !== command.readUInt8()) return;
-
-            if (!this.isCounting) {
-                this.udpTerminal.unlistenTo(UDPTerminal.EVENT_MESSAGE, pingListener);
-                if (this.pingTimer?.hasRef()) {
-                    clearInterval(this.pingTimer);
-                }
-                return;
-            }
-            this.pingCount = this.pingCount + 1;
-
-            const { ping, offset, sendDelay } = this.parsePing(msg);
-
-            this.pings.push(ping);
-            if (this.pings.length > this.maxBufferSize) {
-                this.pings.shift();
-            }
-            this.udpTerminal.send(UDPTerminal.COMMAND_PONG, this.generatePong(ping, offset, sendDelay));            
-        };
-
-        this.udpTerminal.listenTo(UDPTerminal.EVENT_MESSAGE, pingListener);
+    constructor() {
+        super(UDPTerminal.COMMAND_PONG);
+        this.registerListener();
     }
-
+    
     public get Ping() {
-        if (this.pings.length === 0) return NaN;
-        return this.pings.reduce((a, c) => a + c) / this.maxBufferSize;
-    }
+        let successfulPingCount = 0, pingSum = 0;
 
-    public get isCounting() {
-        return this.maxPingCount > this.pingCount;
-    }
-
-    public initPing(count: number, interval: number = 500, buffer: number = 5) {
-        this.maxPingCount = count;
-        this.maxBufferSize = buffer
-        this.lastPing = 0;
-        this.pingCount = 0;
-        this.pings = [];
-
-        if (this.pingTimer?.hasRef()) {
-            clearInterval(this.pingTimer);
+        for (let i = 0; i < this.pings.length; i++) {
+            const ping = this.pings[i];
+            if (ping !== undefined) {
+                successfulPingCount++;
+                pingSum += ping;
+            }            
         }
-
-        this.pingTimer = setInterval(() => {
-            this.udpTerminal.send(UDPTerminal.COMMAND_PING, this.generatePing());
-        }, interval);
-
-        this.udpTerminal.send(UDPTerminal.COMMAND_PING, this.generatePing());
+        return pingSum / successfulPingCount;
     }
 
-    private parsePing(msg: Buffer) {
+    public get Loss() {
+        let lossCount = 0;
+        for (let i = 0; i < this.pings.length; i++) {
+            const ping = this.pings[i];
+            if (ping === undefined) {
+                lossCount++;
+            }            
+        }
+        return lossCount / this.pings.length;
+    }
+    
+    public initPing(count: number) {
+        if (count === 0) {
+            throw new Error("ping count can not initiate with value 0");
+        }
+        this.pings = [];
+        this.pings.length = count;
+        this.generatePing(0);
+    }
+
+    protected listener(buf: Buffer, _: any, snapshot: PingSnapshot): void {
+        const pingCount = snapshot.count;
+        const { ping, sendDelay } = this.parsePing(buf, snapshot.pingedTime);
+
+        this.pings[pingCount] = ping;
+        if (pingCount < this.pings.length) {
+            this.generatePing(pingCount + 1, sendDelay);   
+        } else {
+            this.unregisterListener();
+        }
+    }
+
+    private parsePing(msg: Buffer, pingedTime: number) {
         const sentServerTime = msg.readBigInt64BE(0);
-        const sentReceiveDelay = msg.readUIntBE(8, 2); // offset + half_ping
+        // const sentReceiveDelay = msg.readUIntBE(8, 2); // offset + half_ping
 
         const now = Date.now();
-        const ping = now - this.lastPing;
+        const ping = now - pingedTime;
         const sendDelay = parseInt(sentServerTime.toString()) - now; // offset - half_ping
-        const offset = (sendDelay + sentReceiveDelay) / 2;
+        // const offset = (sendDelay + sentReceiveDelay) / 2;
     
-        return {
-            ping, offset, sendDelay
-        }
+        return { ping, sendDelay };
     }
 
-    private generatePing() {
-        this.lastPing = Date.now();
-        const buf = Buffer.allocUnsafe(8);
-        buf.writeBigInt64BE(BigInt(this.lastPing)); // lastPing: 6
-        return buf;
+    private generatePing(count: number, sendDelay: number = -32768) {
+        const now = Date.now();
+        const buf = Buffer.allocUnsafe(10);
+        buf.writeBigInt64BE(BigInt(now)); // lastPing: 8
+        buf.writeInt16BE(sendDelay, 8);
+        this.send(UDPTerminal.COMMAND_PING, buf, {
+            count: count,
+            pingedTime: now
+        });
+        // TODO: if pong timeout, manually send ping again for remaining ping count
     }
-
-    private generatePong(ping: number, offset: number, sendDelay: number) {
-        const buf = Buffer.allocUnsafe(6);
-        buf.writeUInt16BE(ping); // ping: 2
-        buf.writeInt16BE(offset, 2); // offset: 2
-        buf.writeInt16BE(sendDelay, 4); // sendDelay: 2
-        return buf;
-    }
-}
+};

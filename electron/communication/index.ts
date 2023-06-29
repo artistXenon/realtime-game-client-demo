@@ -1,7 +1,9 @@
 import { IPCTerminal } from "./IPC";
-import { UDPTerminal } from "./UDP";
+import { UDPTerminal, UDPApplication } from "./UDP";
+import { TCPTerminal } from "./TCP";
 
 export {
     IPCTerminal,
-    UDPTerminal
+    UDPTerminal, UDPApplication,
+    TCPTerminal
 };
