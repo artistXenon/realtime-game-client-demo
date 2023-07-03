@@ -21,7 +21,7 @@ export class Lobby {
 
     constructor(id: string) {
         const isValidLobbyID = LOBBY_ID_REGEX.test(id);
-        if (!isValidLobbyID) throw new Error("Given lobby id is malformatted: " + id);
+        if (!isValidLobbyID) throw new Error("given lobby id is malformatted: " + id);
         this.id = id;
     }
 
@@ -37,7 +37,7 @@ export class Lobby {
         await SharedProperties.TCPTerminal.join();
         
         const ping = new PingApp();
-        ping.initPing(20);
+        ping.initPing(200);
     }
 
     public static async GetLobby(prv: boolean, lobbyId: string) {

@@ -104,7 +104,7 @@ export class TCPTerminal {
     }
 
     private createConnection(address: string, port: number): net.Socket {
-        this.connection.destroy();
+        this.connection?.destroy();
         const newConnection = net.connect({ // TODO: look out for this throwing an error. 
             host: address,
             port: port

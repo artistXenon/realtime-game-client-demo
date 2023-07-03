@@ -1,6 +1,5 @@
 import { UDPApplication, UDPTerminal } from "../communication";
 
-
 /**
  * @ message format
  * ping >
@@ -15,13 +14,14 @@ import { UDPApplication, UDPTerminal } from "../communication";
 type PingSnapshot = {
     count: number;
     pingedTime: number;
-};
+}
 
 export class PingApp extends UDPApplication<PingSnapshot> {
     protected pings: number[] = [];
 
     constructor() {
         super(UDPTerminal.COMMAND_PONG);
+        this.resTimeout = 300;
         this.registerListener();
     }
     
@@ -30,10 +30,13 @@ export class PingApp extends UDPApplication<PingSnapshot> {
 
         for (let i = 0; i < this.pings.length; i++) {
             const ping = this.pings[i];
-            if (ping !== undefined) {
+            if (!isNaN(ping)) {
                 successfulPingCount++;
                 pingSum += ping;
             }            
+        }
+        if (successfulPingCount === 0) {
+            return NaN;
         }
         return pingSum / successfulPingCount;
     }
@@ -42,7 +45,7 @@ export class PingApp extends UDPApplication<PingSnapshot> {
         let lossCount = 0;
         for (let i = 0; i < this.pings.length; i++) {
             const ping = this.pings[i];
-            if (ping === undefined) {
+            if (isNaN(ping)) {
                 lossCount++;
             }            
         }
@@ -58,16 +61,24 @@ export class PingApp extends UDPApplication<PingSnapshot> {
         this.generatePing(0);
     }
 
-    protected listener(buf: Buffer, _: any, snapshot: PingSnapshot): void {
+    protected override onResponse(buf: Buffer, _: any, snapshot: PingSnapshot): void {
         const pingCount = snapshot.count;
         const { ping, sendDelay } = this.parsePing(buf, snapshot.pingedTime);
 
-        this.pings[pingCount] = ping;
+        
         if (pingCount < this.pings.length) {
             this.generatePing(pingCount + 1, sendDelay);   
         } else {
-            this.unregisterListener();
+            this.destroy();
         }
+        this.pings[pingCount] = ping;
+    }
+
+    protected override onRequestTimeout(snapshot?: PingSnapshot | undefined): void {
+        if (snapshot === undefined) return;
+        const pingCount = snapshot.count;
+        this.pings[pingCount] = NaN;
+        this.generatePing(pingCount + 1);
     }
 
     private parsePing(msg: Buffer, pingedTime: number) {
@@ -75,8 +86,8 @@ export class PingApp extends UDPApplication<PingSnapshot> {
         // const sentReceiveDelay = msg.readUIntBE(8, 2); // offset + half_ping
 
         const now = Date.now();
-        const ping = now - pingedTime;
         const sendDelay = parseInt(sentServerTime.toString()) - now; // offset - half_ping
+        const ping = now - pingedTime;
         // const offset = (sendDelay + sentReceiveDelay) / 2;
     
         return { ping, sendDelay };

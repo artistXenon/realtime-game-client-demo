@@ -41,9 +41,9 @@ export class UDPTerminal {
 
         this.connection.on(UDPTerminal.EVENT_MESSAGE, (msg: Buffer, info) => {
             const command = msg.readInt8();
-            const count = msg.readUInt32BE();
+            const count = msg.readUInt32BE(1);
             const callback = this.callbacks.get(command);
-            callback?.(msg.subarray(1), count, info);
+            callback?.(msg.subarray(5), count, info);
         });
 
         this.connection.on(UDPTerminal.EVENT_ERROR, (err) => {
