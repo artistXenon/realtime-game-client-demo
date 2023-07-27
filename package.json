@@ -30,6 +30,7 @@
     "vite-plugin-electron": "^0.11.1"
   },
   "dependencies": {
+    "artistic-engine": "^1.2.6",
     "axios": "^1.4.0",
     "crc-32": "^1.2.2",
     "node-machine-id": "^1.1.12"
