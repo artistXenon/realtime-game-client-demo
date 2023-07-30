@@ -10,11 +10,10 @@ import { Lobby } from './application/lobby';
 process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
 
-let win: BrowserWindow | null;
 let session: Session;
 
 app.whenReady().then(() => {
-  win = new BrowserWindow({
+  const win = new BrowserWindow({
     icon: join(process.env.PUBLIC, 'logo.svg'), // TODO: change
     webPreferences: {
       devTools: true,
@@ -31,7 +30,7 @@ app.whenReady().then(() => {
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date()).toLocaleString());
+    win.webContents.send('main-process-message', (new Date()).toLocaleString());
   });
 
   win.webContents.on('will-redirect', async (event, url) => {
@@ -39,9 +38,9 @@ app.whenReady().then(() => {
       event.preventDefault();
       const isCode = await SharedProperties.GoogleCredential.onCode(event, url, win!);
       if (isCode) {
-        return loadGame(win!);
+        return loadGame(win);
       } else {
-        return SharedProperties.GoogleCredential.promptLogin(win!);
+        return SharedProperties.GoogleCredential.promptLogin(win);
       }
     }
     if (!GoogleCredential.isGoogleAccountDomain(url)) {
@@ -51,18 +50,18 @@ app.whenReady().then(() => {
   });
 
   if (!app.isPackaged) {
-    loadGame(win!);
+    loadGame(win);
   } else if (SharedProperties.GoogleCredential.isLocalTokenPrepared) {
     SharedProperties.GoogleCredential.refreshLocalToken()
       .then((done) => {
         if (!done) {
-          SharedProperties.GoogleCredential.promptLogin(win!);
+          SharedProperties.GoogleCredential.promptLogin(win);
         } else {
-          loadGame(win!);
+          loadGame(win);
         }
       });
   } else {
-    SharedProperties.GoogleCredential.promptLogin(win!);
+    SharedProperties.GoogleCredential.promptLogin(win);
   }
   
   session = win.webContents.session;
@@ -71,21 +70,25 @@ app.whenReady().then(() => {
     callback(permissions.indexOf(permission) !== -1); 
   });
 
-  SharedProperties.createIPCTerminal(win!.webContents)
+  SharedProperties.createIPCTerminal(win.webContents)
     .addListener("boo", (a, b, c) => { // browser to node
       console.log(c);
-      setTimeout(() => win?.webContents.send("wah", c), 500); // node to browser
+      setTimeout(() => win.webContents.send("wah", c), 500); // node to browser
     })
     .addListener("join", async (event: IpcMainEvent, isPrivate: boolean, lobbyID: string = "") => {
-      // TODO: request match server for join w/ given info
-      // will receive server address, port, matchid etc
+      // TODO: get error message from join attempt
       const lobby = await Lobby.GetLobby(isPrivate, lobbyID);
       if (lobby === undefined) {
-        console.log("join failure: can not create lobby");
+        win.webContents.send("join", false, 
+          (isPrivate && lobbyID === "") ? "can not create lobby" : "can not join lobby"
+        );
+
+        console.log("join failure: can not join/create lobby");
         return;
       }
       SharedProperties.Lobby = lobby; 
       lobby.join();
+      // make join success response to renderer
     })
     .addListener("app:exit", (event: IpcMainEvent, code: number) => {
       console.log("browser requested exit with code: " + code);
