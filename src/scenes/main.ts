@@ -29,9 +29,9 @@ export class MainScene extends Sprite {
         char.Dimension = new ResolutionVector2D(200, 200);
         char.Position = new ResolutionVector2D(960 - 100, 540 - 100);
 
-        this.startButtonSprite = new MainButton("#aaa", "start button", 0);
-        this.inviteButtonSprite = new MainButton("#aaa", "invite button", 1);
-        this.optionButtonSprite = new MainButton("#aaa", "option button", 2);
+        this.startButtonSprite = new MainButton("#aaa", "join pub", 0);
+        this.inviteButtonSprite = new MainButton("#aaa", "join prv", 1);
+        this.optionButtonSprite = new MainButton("#aaa", "create prv", 2);
         this.exitButtonSprite = new MainButton("#aaa", "exit button", 3);
 
         this.attachChildren([

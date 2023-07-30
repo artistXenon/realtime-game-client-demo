@@ -53,11 +53,11 @@ ipcInterface.onError((e: IpcRendererEvent, err: string) => {
   console.log(err);
 });
 
-setTimeout(() => {
-  // invoke communication loop
-  // ipcInterface.showTime(0)
-  ipcInterface.joinMatch(false); // join public match
-}, 2000);
+// setTimeout(() => {
+//   // invoke communication loop
+//   // ipcInterface.showTime(0)
+//   ipcInterface.joinMatch(false); // join public match
+// }, 2000);
 
 //
 

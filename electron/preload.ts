@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electronIPC", {
   showedTime: (c: (e: IpcRendererEvent, a: number) => void) => ipcRenderer.on("wah", c), // node to browser
 
   joinMatch: (isPrivate: boolean, matchID: string | undefined) => ipcRenderer.send("join", isPrivate, matchID),
+  joinResult: (c: (e: IpcRendererEvent, success: boolean, err: string) => void) => ipcRenderer.once("join", c),
 
   onError: (c: (e: IpcRendererEvent, a: string) => void) => ipcRenderer.on("error", c),
 
