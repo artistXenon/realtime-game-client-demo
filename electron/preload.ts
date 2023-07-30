@@ -8,4 +8,6 @@ contextBridge.exposeInMainWorld("electronIPC", {
   joinMatch: (isPrivate: boolean, matchID: string | undefined) => ipcRenderer.send("join", isPrivate, matchID),
 
   onError: (c: (e: IpcRendererEvent, a: string) => void) => ipcRenderer.on("error", c),
+
+  exit: (code: number) => ipcRenderer.send("app:exit", code)
 });

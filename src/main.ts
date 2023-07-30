@@ -1,35 +1,38 @@
 import './assets/style.css';
 
 import { IpcRendererEvent } from 'electron';
-import { Engine } from 'artistic-engine';
+import { Engine, FontBuilder } from 'artistic-engine';
 import { StartScene } from './scenes/start';
 import { Sprite } from 'artistic-engine/sprite';
 import { EngineAssets } from './assets/engine-assets';
 import { ResolutionVector2D } from './helper/engine/resolution-vector2D';
+import { PointerEventGroup } from 'artistic-engine/event';
+import { Global } from './helper/global';
 
-
-const rootDiv = document.querySelector<HTMLDivElement>('#app')!;
-rootDiv.innerHTML = `<canvas></canvas>`;
 const canvas = document.querySelector<HTMLCanvasElement>('canvas')!;
 
-const engine = new Engine(canvas);
+Global.Engine = new Engine(canvas);
 
 const scene = new StartScene();
-engine.Scene = scene;
+Global.Engine.Scene = scene;
 
 addEventListener("resize", onResize);
 onResize();
 
-engine.start();
+Global.Engine.start();
 
-const assets = new EngineAssets(engine.AssetLoader);
+const assets = new EngineAssets(Global.Engine.AssetLoader);
+
+Global.PointerEventGroup = new PointerEventGroup(Global.Engine);
+Global.PointerEventGroup.registerPointerListener(scene);
+Global.PointerEventGroup.registerEvent();
+Global.PointerEventGroup.setListenSequenceFirstInFirstTrigger(false);
 
 assets.onLoad = () => {
-  setTimeout(() => scene.showAilre(engine), 1000);
-  
+  Global.FontPoppin = new FontBuilder("Poppin");
+  Global.FontQuicksand = new FontBuilder("Quicksand");
+  setTimeout(() => scene.showAilre(), 1000);
 };
-
-
 
 
 
@@ -59,6 +62,7 @@ setTimeout(() => {
 //
 
 function onResize() {  
+  const engine = Global.Engine;
   engine.resizeCanvas();
   ResolutionVector2D.baseVector.X = engine.Canvas.width;
   ResolutionVector2D.baseVector.Y = engine.Canvas.height;

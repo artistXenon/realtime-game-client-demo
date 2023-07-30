@@ -1,4 +1,4 @@
-import Sprite from "artistic-engine/sprite/sprite";
+import { Sprite } from "artistic-engine/sprite";
 
 export class OptionScene extends Sprite {
     private static instance: OptionScene;

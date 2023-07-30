@@ -2,10 +2,6 @@ import { Vector } from "artistic-engine";
 
 export class ResolutionVector2D extends Vector.Vector2D {
     public static baseVector: Vector.Vector2D = new Vector.Vector2D();
-
-    constructor(x: number = 0, y: number = 0) {
-        super();
-    }
     
     public static onUpdate(width: number, height: number) {
         this.baseVector.X = width;
@@ -28,19 +24,39 @@ export class ResolutionVector2D extends Vector.Vector2D {
         return y * this.baseVector.Y / 1080;
     }
 
+    constructor(x: number = 0, y: number = 0) {
+        super(x, y);
+    }
+
+    public override get X() {
+        return ResolutionVector2D.reconX(this.values[0]);
+    }
+    
+    public override get Y() {
+        return ResolutionVector2D.reconY(this.values[1]);
+    }
+
     public get normalX() {
-        return ResolutionVector2D.normalizeX(this.X);
+        return this.values[0];
     }
     
     public get normalY() {
-        return ResolutionVector2D.normalizeY(this.Y);
+        return this.values[1];
+    }
+    
+    public override set X(x: number) {
+        this.values[0] = ResolutionVector2D.normalizeX(x);
+    }
+    
+    public override set Y(y: number) {
+        this.values[1] = ResolutionVector2D.normalizeY(y);
     }
 
     public set normalX(x: number) {
-        this.X = ResolutionVector2D.reconX(x);
+        this.values[0] = x;
     }
     
     public set normalY(y: number) {
-        this.Y = ResolutionVector2D.reconY(y);
+        this.values[1] = y;
     }
 }

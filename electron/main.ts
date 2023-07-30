@@ -1,6 +1,3 @@
-process.env.DIST = join(__dirname, '../dist');
-process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
-
 import { join } from 'path';
 import { app, BrowserWindow, IpcMainEvent, Session, shell } from 'electron';
 
@@ -10,22 +7,26 @@ import { SharedProperties } from './shared-properties';
 import { GoogleCredential } from './google';
 import { Lobby } from './application/lobby';
 
+process.env.DIST = join(__dirname, '../dist');
+process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
+
 let win: BrowserWindow | null;
 let session: Session;
 
 app.whenReady().then(() => {
   win = new BrowserWindow({
     icon: join(process.env.PUBLIC, 'logo.svg'), // TODO: change
-    autoHideMenuBar: true,
     webPreferences: {
       devTools: true,
       contextIsolation: true,
       nodeIntegration: true,
       preload: join(__dirname, './preload.js'),
     },
+    minWidth: 1280
   });
   SharedProperties.BrowserWindow = win;
 
+  win.setMenuBarVisibility(false);
   win.setAspectRatio(16 / 9);
 
   // Test active push message to Renderer-process.
@@ -49,7 +50,9 @@ app.whenReady().then(() => {
     }    
   });
 
-  if (SharedProperties.GoogleCredential.isLocalTokenPrepared) {
+  if (!app.isPackaged) {
+    loadGame(win!);
+  } else if (SharedProperties.GoogleCredential.isLocalTokenPrepared) {
     SharedProperties.GoogleCredential.refreshLocalToken()
       .then((done) => {
         if (!done) {
@@ -83,7 +86,11 @@ app.whenReady().then(() => {
       }
       SharedProperties.Lobby = lobby; 
       lobby.join();
-    });
+    })
+    .addListener("app:exit", (event: IpcMainEvent, code: number) => {
+      console.log("browser requested exit with code: " + code);
+      app.quit();
+    })
 });
 
 function loadGame(win: BrowserWindow) {

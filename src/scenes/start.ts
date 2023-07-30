@@ -1,17 +1,24 @@
+import { IPointerListener } from "artistic-engine/event";
 import { Sprite, TextSprite } from "artistic-engine/sprite";
-import { Engine, FontBuilder, Vector } from "artistic-engine";
+import { Engine, FontBuilder } from "artistic-engine";
 import { Modifier } from "artistic-engine/modifiers";
 import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
+import { MainScene } from "./main";
+import { Global } from "../helper/global";
+import { ComputedVector2D } from "../helper/engine/computed-vector2D";
+import { getTextWidth as getTextMetrix } from "../helper/text";
 
-export class StartScene extends Sprite {
-    private poppinFont: FontBuilder;
-    private quicksandFont: FontBuilder;
+export class StartScene extends Sprite implements IPointerListener {
+
+    public PointerRegistered: boolean = true;
+    public RecieveEventsOutOfBound: boolean = true;
     
-    private engine: Engine | undefined;
-
     private mainTextSprite: TextSprite = new TextSprite();
     private subTextSprite1: TextSprite = new TextSprite();
     private indicatorTextSprite: TextSprite = new TextSprite();
+    // private noticeTextSprite: TextSprite = new TextSprite();
+
+    private cacheTextMetrics: number = 0;
     private modifier: Modifier | undefined;
     private opacity: number = 0;
 
@@ -22,15 +29,11 @@ export class StartScene extends Sprite {
         // TODO: modifiers will show logo of 
         // Ailre
         // pride - artistic
-        // unofficial derivative of hololive cover corp
-        this.poppinFont = new FontBuilder("Poppin");
-        this.quicksandFont = new FontBuilder("Quicksand");
-        
+        // notice about unofficial derivative of hololive cover corp        
     }
     public onDraw(ctx: CanvasRenderingContext2D, delay: number): void {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, this.W, this.H);
-        let tmpf, textMeasure;
         const white = this.white(), black = this.black();
         switch(this.state) {
             case 0:
@@ -39,30 +42,16 @@ export class StartScene extends Sprite {
                 if (this.modifier !== undefined && this.modifier.Progress >= 1) {
                     this.showEngine();
                 }
-                tmpf = ctx.font;
-                ctx.font = this.mainTextSprite.Property.font;
-                textMeasure = ctx.measureText(this.mainTextSprite.Text);
-                ctx.font = tmpf;
 
                 this.mainTextSprite.Property.fill = white;
                 this.indicatorTextSprite!.Property.fill = white;
 
-                this.mainTextSprite.X = ResolutionVector2D.reconX(960) - textMeasure.width / 2;
-                this.mainTextSprite.Y = ResolutionVector2D.reconY(540) - 50;
-
-                this.indicatorTextSprite.X = this.mainTextSprite.X;
-                this.indicatorTextSprite.Y = this.mainTextSprite.Y - 35;
                 break;
             case 2: 
-                tmpf = ctx.font;
-                ctx.font = this.mainTextSprite.Property.font;
-                let textMeasure1 = ctx.measureText(this.mainTextSprite.Text);
-                ctx.font = this.subTextSprite1.Property.font;
-                let textMeasure2 = ctx.measureText(this.subTextSprite1.Text);
-                ctx.font = tmpf;
+                let textMeasure2 = getTextMetrix(this.subTextSprite1.Text, this.subTextSprite1.Property.font);
                 if (this.modifier !== undefined && this.modifier.Progress >= 1) {
                     // show hololive unofficial
-                    this.destroyScene();
+                    setTimeout(() => this.skip(), 1000);                    
                 }
 
                 ctx.fillRect(0, 0, 0, 0);
@@ -70,72 +59,106 @@ export class StartScene extends Sprite {
                 this.subTextSprite1.Property.fill = black;
                 this.indicatorTextSprite.Property.fill = white;
 
-                this.mainTextSprite.X = ResolutionVector2D.reconX(960) - (textMeasure1.width + textMeasure2.width) / 2;
-                this.mainTextSprite.Y = ResolutionVector2D.reconY(540) - 40;
-                
-                this.subTextSprite1.X = this.mainTextSprite.X + textMeasure1.width;
-                this.subTextSprite1.Y = this.mainTextSprite.Y;
-
                 ctx.fillStyle = white;
-                ctx.fillRect(this.subTextSprite1.X, this.subTextSprite1.Y, textMeasure2.width + 3, 73);
+                ctx.fillRect(this.subTextSprite1.X, this.subTextSprite1.Y, this.cacheTextMetrics + 3, 73);
 
-                this.indicatorTextSprite.X = this.mainTextSprite.X;
-                this.indicatorTextSprite.Y = this.mainTextSprite.Y - 35;   
                 break;
         }
     }
 
-    public showAilre(engine: Engine) {
+    public showAilre() {
         this.state = 1;
         this.indicatorTextSprite = new TextSprite();
         this.attachChildren([this.mainTextSprite, this.indicatorTextSprite]);
 
-        this.poppinFont.setSize("100px").setWeight("500");
-        this.mainTextSprite.Property.font = this.poppinFont.toString();
+        Global.FontPoppin.setSize("100px").setWeight("500");
+        this.mainTextSprite.Property.font = Global.FontPoppin.toString();
         this.mainTextSprite.Property.fill = "white";
         this.mainTextSprite.Text = "Ailre";
-        
+
         const defFont = new FontBuilder();
         defFont.setSize("30px");
         this.indicatorTextSprite.Property.font = defFont.toString();
         this.indicatorTextSprite.Property.fill = "white";
         this.indicatorTextSprite.Text = "developed by";
 
-        this.engine = engine;
+        const textMeasure = getTextMetrix(this.mainTextSprite.Text, this.mainTextSprite.Property.font);
+
+        const 
+            computedVector1 = new ComputedVector2D(
+                () => ResolutionVector2D.reconX(960) - textMeasure.width / 2,
+                () => ResolutionVector2D.reconY(540) - 50
+            ),
+            computedVector2 = new ComputedVector2D(
+                () => computedVector1.X,
+                () => computedVector1.Y - 35
+            );
+
+        this.mainTextSprite.Position = computedVector1;
+        this.indicatorTextSprite.Position = computedVector2;
+
         this.modifier = new Modifier(0, 1, 3000, (v) => {
             this.opacity = this.modify(v);
         });
-        this.engine.registerModifier(this.modifier);
+        Global.Engine.registerModifier(this.modifier);
     }
 
     private showEngine() {
         this.attachChildren(this.subTextSprite1);
         this.state = 2;
-        this.poppinFont.setSize("80px");
-        this.mainTextSprite.Property.font = this.poppinFont.toString();
+        Global.FontPoppin.setSize("80px");
+        this.mainTextSprite.Property.font = Global.FontPoppin.toString();
         this.mainTextSprite.Property.fill = "white";
         this.mainTextSprite.Text = "artistic";
-
-        this.quicksandFont.setSize("80px").setWeight("300");
-        this.subTextSprite1.Property.font = this.quicksandFont.toString();
+        
+        Global.FontQuicksand.setSize("80px").setWeight("300");
+        this.subTextSprite1.Property.font = Global.FontQuicksand.toString();
         this.subTextSprite1.Property.fill = "black";
         this.subTextSprite1.Text = "ENGINE";
         
         this.indicatorTextSprite.Text = "developed with";
 
+        const 
+            textMeasure1 = getTextMetrix(this.mainTextSprite.Text, this.mainTextSprite.Property.font),
+            textMeasure2 = getTextMetrix(this.subTextSprite1.Text, this.subTextSprite1.Property.font);
+
+        const 
+            computedVector1 = new ComputedVector2D(
+                () => ResolutionVector2D.reconX(960) - (textMeasure1.width + textMeasure2.width) / 2,
+                () => ResolutionVector2D.reconY(540) - 40
+            ),
+            computedVector2 = new ComputedVector2D(
+                () => this.mainTextSprite.X + textMeasure1.width,
+                () => this.mainTextSprite.Y
+            ),          
+            computedVector3 = new ComputedVector2D(
+                () => this.mainTextSprite.X,
+                () => this.mainTextSprite.Y - 35
+            );
+        
+        this.cacheTextMetrics = textMeasure2.width;
+        this.mainTextSprite.Position = computedVector1;
+        this.subTextSprite1.Position = computedVector2;      
+        this.indicatorTextSprite.Position = computedVector3;
+
         this.modifier = new Modifier(0, 1, 3000, (v) => {
             this.opacity = this.modify(v);
         });
-        this.engine!.registerModifier(this.modifier);
+        Global.Engine.registerModifier(this.modifier);
     }
 
-    private destroyScene() {
-        this.state = 3;
-        // change scene to main
+    public onPointer(e: PointerEvent): boolean {
+        if (e.type !== "pointerdown") return false;
+        Global.PointerEventGroup.unregisterPointerListener(this);
+        this.skip();
+        return true;
     }
+
 
     private skip() {
-        // TODO: on click, skip intro logos. 
+        this.state = 3;
+        // change scene to main
+        Global.Engine.Scene = new MainScene();
     }
 
     private black() {
