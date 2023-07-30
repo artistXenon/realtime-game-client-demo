@@ -1,2 +1,2 @@
 // allowed permissions
-export default ["fullscreen"];
+export default ["fullscreen", "clipboard-read"];

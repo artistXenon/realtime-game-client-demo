@@ -4,6 +4,8 @@ import { TempSprite } from "../temp-sprite";
 import { Global } from "../../helper/global";
 import { OptionPrompt } from "../../prompt/option";
 import { Vector } from "artistic-engine";
+import { JoinPrivatePrompt } from "../../prompt/join-prv";
+import { CreatePrivatePrompt } from "../../prompt/crt-prv";
 
 
 export class MainButton extends TempSprite implements IPointerListener {
@@ -39,9 +41,10 @@ export class MainButton extends TempSprite implements IPointerListener {
                         case 0:
                             break;
                         case 1:
+                            this.Parent!.attachChildren(new JoinPrivatePrompt());
                             break;
                         case 2:
-                            this.Parent!.attachChildren(new OptionPrompt());
+                            this.Parent!.attachChildren(new CreatePrivatePrompt());
                             break;
                         case 3:
                             // TODO: may be exit animation etc
