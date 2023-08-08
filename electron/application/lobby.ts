@@ -9,6 +9,9 @@ const LOBBY_ID_REGEX = /^[a-zA-Z0-9]{5}$/;
 export class Lobby {
     private id: string;
 
+    private isPrivate: boolean;
+
+    private state: number = 1;
     // game state
     // players
     // teams
@@ -19,10 +22,11 @@ export class Lobby {
     // is gaming
     // is game ended etc
 
-    constructor(id: string) {
+    constructor(id: string, prv: boolean) {
         const isValidLobbyID = LOBBY_ID_REGEX.test(id);
         if (!isValidLobbyID) throw new Error("given lobby id is malformatted: " + id);
         this.id = id;
+        this.isPrivate = prv;
     }
 
     public get ID() {
@@ -38,6 +42,16 @@ export class Lobby {
         
         const ping = new PingApp();
         ping.initPing(200);
+        // TODO: // ask for lobby. wait for response
+        // SharedProperties.TCPTerminal.send(); 
+        // SharedProperties.TCPTerminal.listenTo()
+        // update lobby to renderer
+        // this.onUpdate();
+    }
+
+    public onUpdate() {
+        // SharedProperties.IPCTerminal.send("lobby", this);
+        console.log(this);
     }
 
     public static async GetLobby(prv: boolean, lobbyId: string) {
@@ -59,7 +73,7 @@ export class Lobby {
             if (server === undefined) return undefined;
             SharedProperties.createUDPTerminal(server, udp);
             SharedProperties.createTCPTerminal(server, tcp);
-            return new Lobby(lobby);
+            return new Lobby(lobby, prv);
         } catch (e) {
             const error_code = (<any>e).response?.status;
             // this is axios

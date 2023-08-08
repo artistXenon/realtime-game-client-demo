@@ -44,9 +44,14 @@ export class CreatePrivatePrompt extends Prompt {
         this.createButton = new TempPointerSprite("skyblue", "", onClick(() => {
             /* TODO: do create */
             this.showLoading();
-            // Global.createMatch(true, (_, success, err) => {
-            //     if (!success) this.showError(err);
-            // });
+            Global.JoinMatch(true, undefined, (_, success, detail: any) => {
+                if (!success) this.showError(detail.err);
+                else {
+                    console.log(detail.id);
+                    // TODO: join and close prompt 
+                }
+            });            
+            // window.navigator.clipboard.writeText()
         }, () => true));
         this.createButton.RecieveEventsOutOfBound = false;
         this.createButton.W = 150;
@@ -74,7 +79,7 @@ export class CreatePrivatePrompt extends Prompt {
     public showLoading() {
         this.errText
         this.errText.Property.fill = "black";
-        this.errText.Text = "Joining";
+        this.errText.Text = Global.getString("loading");
         const tm = getTextWidth(this.errText.Text, this.errText.Property.font);
         this.errText.X = (this.window.W - tm.width) / 2;
         if (this.errText.Parent !== this.window) {

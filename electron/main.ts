@@ -6,6 +6,7 @@ import { SharedProperties } from './shared-properties';
 
 import { GoogleCredential } from './google';
 import { Lobby } from './application/lobby';
+import { IPCTerminal } from './communication';
 
 process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
@@ -49,7 +50,7 @@ app.whenReady().then(() => {
     }    
   });
 
-  if (!app.isPackaged) {
+  if (false) { // !app.isPackaged
     loadGame(win);
   } else if (SharedProperties.GoogleCredential.isLocalTokenPrepared) {
     SharedProperties.GoogleCredential.refreshLocalToken()
@@ -73,21 +74,26 @@ app.whenReady().then(() => {
   SharedProperties.createIPCTerminal(win.webContents)
     .addListener("boo", (a, b, c) => { // browser to node
       console.log(c);
-      setTimeout(() => win.webContents.send("wah", c), 500); // node to browser
+      setTimeout(() => SharedProperties.IPCTerminal.send("wah", c), 500); // node to browser
     })
     .addListener("join", async (event: IpcMainEvent, isPrivate: boolean, lobbyID: string = "") => {
       // TODO: get error message from join attempt
       const lobby = await Lobby.GetLobby(isPrivate, lobbyID);
       if (lobby === undefined) {
-        win.webContents.send("join", false, 
-          (isPrivate && lobbyID === "") ? "can not create lobby" : "can not join lobby"
+        SharedProperties.IPCTerminal.send("join", false, 
+          {
+            err: (isPrivate && lobbyID === "") ? "can not create lobby" : "can not join lobby"
+          }
         );
 
         console.log("join failure: can not join/create lobby");
         return;
       }
       SharedProperties.Lobby = lobby; 
-      lobby.join();
+      await lobby.join();
+      SharedProperties.IPCTerminal.send("join", true, {
+        id: SharedProperties.Lobby.ID
+      });
       // make join success response to renderer
     })
     .addListener("app:exit", (event: IpcMainEvent, code: number) => {

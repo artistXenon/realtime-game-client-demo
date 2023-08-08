@@ -47,9 +47,12 @@ export class JoinPrivatePrompt extends Prompt {
                 return this.showError("Invalid code!");
             }
             this.showLoading();
-            Global.JoinMatch(true, code, (_, success, err) => {
-                if (!success) this.showError(err);
-                // TODO: join and close prompt 
+            Global.JoinMatch(true, code, (_, success, detail: any) => {
+                if (!success) this.showError(detail.err);
+                else {
+                    console.log(detail.id);
+                    // TODO: join and close prompt 
+                }
             });            
         }, () => true));
         this.joinButton.RecieveEventsOutOfBound = false;
@@ -78,7 +81,7 @@ export class JoinPrivatePrompt extends Prompt {
     public showLoading() {
         this.errText
         this.errText.Property.fill = "black";
-        this.errText.Text = "Joining";
+        this.errText.Text = Global.getString("loading");
         const tm = getTextWidth(this.errText.Text, this.errText.Property.font);
         this.errText.X = (this.window.W - tm.width) / 2;
         if (this.errText.Parent !== this.window) {

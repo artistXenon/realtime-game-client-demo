@@ -15,6 +15,7 @@ export class TCPTerminal {
     public static readonly EVENT_END: TCPEvent = "end";
 
     public static readonly COMMAND_JOIN: TCPCommand = 0x01;
+    public static readonly COMMAND_LOBBY: TCPCommand = 0x02;
     public static readonly COMMAND_CONNECT: TCPCommand = 0x04;
     public static readonly COMMAND_RECONNECT: TCPCommand = 0x05;
 

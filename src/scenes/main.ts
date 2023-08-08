@@ -32,7 +32,7 @@ export class MainScene extends Sprite {
         this.startButtonSprite = new MainButton("#aaa", "join pub", 0);
         this.inviteButtonSprite = new MainButton("#aaa", "join prv", 1);
         this.optionButtonSprite = new MainButton("#aaa", "create prv", 2);
-        this.exitButtonSprite = new MainButton("#aaa", "exit button", 3);
+        this.exitButtonSprite = new MainButton("#aaa", "exit button", 3); // TODO: this can be hidden
 
         this.attachChildren([
             char,
