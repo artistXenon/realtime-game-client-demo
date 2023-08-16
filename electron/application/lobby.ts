@@ -83,4 +83,33 @@ export class Lobby {
             return undefined;
         }
     }
+
+    public static parseLobbyJoin(b: Buffer) {
+        const state = b.readInt8();
+        const playerBuffers = [
+            b.subarray(1, 26),
+            b.subarray(26, 51),
+            b.subarray(51, 76),
+            b.subarray(76, 101)
+        ];
+        const players = [];
+        for (const playerBuffer of playerBuffers) {
+            const playerState = playerBuffer.readInt8();
+            if ((playerState & 0b1000_0000) === 0) continue;
+            const ready = (playerState & 0b0100_0000) !== 0;
+            const leader = (playerState & 0b0010_0000) !== 0;
+            const me = (playerState & 0b0001_0000) !== 0;
+
+            const team = playerBuffer.readInt8(1);
+            const name = playerBuffer.subarray(2, 18).toString().replaceAll("\x00", "");
+            const id = playerBuffer.subarray(18, 23).toString();
+            const character = playerBuffer.readInt16BE(23);
+            players.push({
+                id, name, team, me, ready, leader, character
+            });
+        }
+        return {
+            state, players
+        };
+    }
 }

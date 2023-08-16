@@ -3,6 +3,7 @@ import { GoogleCredential } from "../google";
 import { IPCTerminal, UDPTerminal, TCPTerminal } from "../communication";
 import Preferences from "../preferences";
 import { Lobby } from "../application/lobby";
+import { apply } from "./IPC-application";
 
 export class SharedProperties {
   private constructor() {}
@@ -86,6 +87,7 @@ export class SharedProperties {
 
   public static createIPCTerminal(web: WebContents): IPCTerminal {
     this.ipcTerminal = new IPCTerminal(web);
+    apply(this.ipcTerminal);
     return this.ipcTerminal;
   }
 }
