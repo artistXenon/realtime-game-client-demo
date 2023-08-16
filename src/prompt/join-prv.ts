@@ -6,6 +6,7 @@ import { getTextWidth } from "../helper/text";
 import { ComputedVector2D } from "../helper/engine/computed-vector2D";
 import { TempPointerSprite } from "../sprites/temp-pointer-sprite";
 import { onClick } from "../helper/engine/pointer-processor";
+import { Lobby } from "../game/lobby";
 
 export class JoinPrivatePrompt extends Prompt {
     public PointerRegistered: boolean = true;
@@ -51,7 +52,8 @@ export class JoinPrivatePrompt extends Prompt {
                 if (!success) this.showError(detail.err);
                 else {
                     console.log(detail.id);
-                    // TODO: join and close prompt 
+                    Lobby.createNew(detail.id);
+                    this.onDestroy();
                 }
             });            
         }, () => true));

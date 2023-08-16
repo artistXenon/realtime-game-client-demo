@@ -14,6 +14,7 @@ export class TCPTerminal {
     public static readonly EVENT_CLOSE: TCPEvent = "close";
     public static readonly EVENT_END: TCPEvent = "end";
 
+    public static readonly COMMAND_CLOSE: TCPCommand = 0x00;
     public static readonly COMMAND_JOIN: TCPCommand = 0x01;
     public static readonly COMMAND_LOBBY: TCPCommand = 0x02;
     public static readonly COMMAND_CONNECT: TCPCommand = 0x04;
@@ -28,6 +29,10 @@ export class TCPTerminal {
     private isConnected: boolean = false;
 
     private doReconnect: boolean = true;
+
+    private firstReconnect: number = 0;
+
+    private destroy: net.Socket | undefined;
 
     private connection: net.Socket;
 
@@ -62,7 +67,20 @@ export class TCPTerminal {
         this.connection.write(bodyBuffer);
     }
 
-    public async join(reconnect: boolean = false) {     
+    public async join(reconnect: boolean = false) {             
+        let command: number;
+        if (reconnect) {
+            if (this.firstReconnect === 0) {
+                this.firstReconnect = Date.now();
+            } else if (Date.now() - this.firstReconnect > 10000){
+                this.firstReconnect = 0;
+                return;
+            }
+            command = TCPTerminal.COMMAND_RECONNECT;
+        } else {
+            command = TCPTerminal.COMMAND_JOIN;
+        }        
+
         if (!this.isConnected) {
             await new Promise<void>((res, rej) => {
                 const itv = setInterval(_ => {
@@ -79,11 +97,7 @@ export class TCPTerminal {
         }
         // command[1]
         const commandBuffer = Buffer.allocUnsafe(1);
-        if (reconnect) {
-            commandBuffer.writeUInt8(TCPTerminal.COMMAND_RECONNECT);
-        } else {
-            commandBuffer.writeUInt8(TCPTerminal.COMMAND_JOIN);
-        }        
+        commandBuffer.writeInt8(command);
 
         // userid[10]
         const userBuffer = SharedProperties.UserIDBuffer!;
@@ -101,11 +115,22 @@ export class TCPTerminal {
         hashBuffer.writeInt32BE(generateCRC32(signedBodyBuffer));
         const messageBuffer = Buffer.concat([hashBuffer, bodyBuffer]);
 
-        this.connection.write(messageBuffer);
+        this.listenTo(command, (b: Buffer) => {
+            const err = b.readInt8();
+            switch (err) {
+                case 0: 
+                    break;
+                case 1:
+                default: 
+                this.doReconnect = false;
+            }            
+            this.unlistenTo(command);
+        }, true);
+
+        return this.connection.write(messageBuffer);
     }
 
     private createConnection(address: string, port: number): net.Socket {
-        this.connection?.destroy();
         const newConnection = net.connect({ // TODO: look out for this throwing an error. 
             host: address,
             port: port
@@ -115,8 +140,15 @@ export class TCPTerminal {
 
         newConnection.on(TCPTerminal.EVENT_DATA, (msg: Buffer, info) => {
             const command = msg.readInt8();
+            if (command === TCPTerminal.COMMAND_CLOSE) {
+                this.destroy = newConnection;
+                newConnection.unref();
+                newConnection.destroy();
+                return;
+            }
+            const length = msg.readUint32BE(1);
             const callback = this.callbacks.get(command);
-            callback?.(msg.subarray(1), info);
+            callback?.(msg.subarray(5, 5 + length), info);
         });
 
         newConnection.on(TCPTerminal.EVENT_DRAIN, () => { });
@@ -125,12 +157,18 @@ export class TCPTerminal {
 
         newConnection.on(TCPTerminal.EVENT_ERROR, (err) => { });
 
-        newConnection.on(TCPTerminal.EVENT_CLOSE, () => { 
-            if (this.doReconnect) {
-                this.connection = this.createConnection(address, port);
-                this.join(true);
+        // newConnection.on("connect", () => { console.log("does this even happen") });
 
+        newConnection.on(TCPTerminal.EVENT_CLOSE, () => { 
+            this.isConnected = false;
+            if (this.doReconnect && this.destroy !== newConnection) {
+                setTimeout(async () => {
+                    this.connection = this.createConnection(address, port);
+                    await this.join(true);
+                }, 2000);
                 // TODO: on reconnect failure, let app know and leave the lobby
+            } else {
+                this.destroy = undefined;
             }
         });
 

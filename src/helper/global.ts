@@ -28,6 +28,10 @@ export class Global {
         // TODO: create preload interface and connect to crt-prv
     }
 
+    public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: unknown) => void) {
+        (<any>window).electronIPC.getLobbyData(matchID, c);
+    }
+
     public static getString(key: string, ...args: string[]) {
         let template: string;
         switch (Global.Locale) {

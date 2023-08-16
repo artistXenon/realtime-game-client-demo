@@ -14,6 +14,8 @@ export class MainScene extends Sprite {
         return this.instance;
     }
 
+    private menuState: number = 0;
+
     private characterSprites: Character[] = [];
 
     private startButtonSprite: MainButton;
@@ -56,6 +58,10 @@ export class MainScene extends Sprite {
         // ... check tablet again
 
         // 
+    }
+
+    public toMenuState(state: number) {
+        // TODO: u know what to do
     }
 
     

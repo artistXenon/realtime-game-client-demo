@@ -8,17 +8,24 @@ import { TempPointerSprite } from "../sprites/temp-pointer-sprite";
 import { onClick } from "../helper/engine/pointer-processor";
 import { Lobby } from "../game/lobby";
 
-export class CreatePrivatePrompt extends Prompt {
+export class JoinPublicPrompt extends Prompt {
+
+    // TODO:
+    // NOT CONFIRMED. 
+    // THIS IS A STRAIGHT COPY OF JOIN-PRIVATE
+    // READ THROUGH WHOLE FILE BEFORE USE
+
+
     public PointerRegistered: boolean = true;
     public RecieveEventsOutOfBound: boolean = true;
 
-    private createButton: TempPointerSprite;
+    private joinButton: TempPointerSprite;
     private exitButton: TempPointerSprite;
     private errText: TextSprite;
 
     constructor() {
         super(new Rectangle());
-        
+
         (<Rectangle>this.window).FillStyle = "#666";
         this.window.Width = 600;       
         this.window.Height = 240;       
@@ -27,41 +34,43 @@ export class CreatePrivatePrompt extends Prompt {
             () => ResolutionVector2D.reconY(540) - this.window.Height / 2,
         );       
 
-        const title = new TextSprite();
-        
+        const title = new TextSprite({ Y: 20 });        
+
         Global.FontQuicksand.setSize("40px").setWeight("bold");
         title.Property.font = Global.FontQuicksand.toString();
         title.Property.fill = "black";
-        title.Text = "Create private lobby"; // TODO: clean up for translation
+        title.Text = "Click JOIN after copying code"; // TODO: clean up for translation
         const tm = getTextWidth(title.Text, title.Property.font);
         title.X = (this.window.W - tm.width) / 2;
-        title.Y = 30;
         this.window.attachChildren(title);
 
         this.errText = new TextSprite({ Y: title.Y + 60 });
         Global.FontQuicksand.setSize("20px").setWeight("bold");
         this.errText.Property.font = Global.FontQuicksand.toString();
 
-        this.createButton = new TempPointerSprite("skyblue", "", onClick(() => {
-            /* TODO: do create */
+        this.joinButton = new TempPointerSprite("skyblue", "", onClick(async () => {
+            const code = await navigator.clipboard.readText();
+            const isCode = /^[a-zA-Z0-9]{5}$/.test(code);
+            if (!isCode) {
+                return this.showError("Invalid code!");
+            }
             this.showLoading();
-            Global.JoinMatch(true, undefined, (_, success, detail: any) => {
+            Global.JoinMatch(true, code, (_, success, detail: any) => {
                 if (!success) this.showError(detail.err);
                 else {
                     console.log(detail.id);
                     Lobby.createNew(detail.id);
                     this.onDestroy();
-                    window.navigator.clipboard.writeText(detail.id);
                 }
-            });           
+            });            
         }, () => true));
-        this.createButton.RecieveEventsOutOfBound = false;
-        this.createButton.W = 150;
-        this.createButton.H = 75;
-        this.createButton.X = this.window.W / 2 - this.createButton.W - 20;
-        this.createButton.Y = this.window.H - this.createButton.H - 20;
+        this.joinButton.RecieveEventsOutOfBound = false;
+        this.joinButton.W = 150;
+        this.joinButton.H = 75;
+        this.joinButton.X = this.window.W / 2 - this.joinButton.W - 20;
+        this.joinButton.Y = this.window.H - this.joinButton.H - 20;
 
-        this.window.attachChildren(this.createButton);
+        this.window.attachChildren(this.joinButton);
         
         this.exitButton = new TempPointerSprite("pink", "", onClick(() => this.onDestroy(), () => true));
         this.exitButton.RecieveEventsOutOfBound = false;
@@ -73,7 +82,7 @@ export class CreatePrivatePrompt extends Prompt {
         this.window.attachChildren(this.exitButton);
 
         Global.PointerEventGroup.registerPointerListener(this);
-        Global.PointerEventGroup.registerPointerListener(this.createButton);
+        Global.PointerEventGroup.registerPointerListener(this.joinButton);
         Global.PointerEventGroup.registerPointerListener(this.exitButton);
         // Global.PointerEventGroup.registerPointerListener();
     }
@@ -102,10 +111,9 @@ export class CreatePrivatePrompt extends Prompt {
 
     public onDestroy(): void {
         // remove from parent, remove pointer
-        console.log("destroy attempt");
         this.Parent?.detachChildren(this);
         Global.PointerEventGroup.unregisterPointerListener(this);
-        Global.PointerEventGroup.unregisterPointerListener(this.createButton);
+        Global.PointerEventGroup.unregisterPointerListener(this.joinButton);
         Global.PointerEventGroup.unregisterPointerListener(this.exitButton);
 
         // WARN: dont forget to add additional elemtents
