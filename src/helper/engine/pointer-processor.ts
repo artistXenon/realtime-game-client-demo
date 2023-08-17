@@ -8,8 +8,7 @@ export function onClick(action: () => unknown, capture: (e: PointerEvent) => boo
             if (e.pointerId === pointerId && Date.now() - pointerTime < 1000) {
                 action();
             }
-        }
-        
+        }        
         return capture(e);
     };
 }

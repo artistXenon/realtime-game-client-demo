@@ -15,6 +15,9 @@ export class MainScene extends Sprite {
     }
 
     private menuState: number = 0;
+    // 0: nothing. initial state
+    // 1: main menu. not in lobby
+    // 2: lobby menu. show players and control
 
     private characterSprites: Character[] = [];
 
@@ -31,17 +34,13 @@ export class MainScene extends Sprite {
         char.Dimension = new ResolutionVector2D(200, 200);
         char.Position = new ResolutionVector2D(960 - 100, 540 - 100);
 
-        this.startButtonSprite = new MainButton("#aaa", "join pub", 0);
-        this.inviteButtonSprite = new MainButton("#aaa", "join prv", 1);
-        this.optionButtonSprite = new MainButton("#aaa", "create prv", 2);
-        this.exitButtonSprite = new MainButton("#aaa", "exit button", 3); // TODO: this can be hidden
+        this.startButtonSprite = new MainButton("#aaa", "join pub", 0, 1);
+        this.inviteButtonSprite = new MainButton("#aaa", "join prv", 1, 1);
+        this.optionButtonSprite = new MainButton("#aaa", "create prv", 2, 1);
+        this.exitButtonSprite = new MainButton("#aaa", "exit button", 3, 1); // TODO: this can be hidden
 
         this.attachChildren([
-            char,
-            this.startButtonSprite,
-            this.inviteButtonSprite,
-            this.optionButtonSprite,
-            this.exitButtonSprite
+            char
         ]);
 
         Global.PointerEventGroup.registerPointerListener(this.startButtonSprite);
@@ -58,10 +57,31 @@ export class MainScene extends Sprite {
         // ... check tablet again
 
         // 
+        this.MenuState = 1;
     }
 
-    public toMenuState(state: number) {
+    public get MenuState() {
+        return this.menuState;
+    }
+
+    public set MenuState(state: number) {
         // TODO: u know what to do
+        if (state !== 0) {
+
+        }
+
+        switch (state) {
+            case 1: 
+                this.attachChildren([
+                    this.startButtonSprite,
+                    this.inviteButtonSprite,
+                    this.optionButtonSprite,
+                    this.exitButtonSprite
+                ]);
+                break;
+            default:
+        }
+        this.menuState = state;
     }
 
     

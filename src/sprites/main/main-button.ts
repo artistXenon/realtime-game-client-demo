@@ -2,21 +2,26 @@ import { IPointerListener } from "artistic-engine/event/event_groups";
 import { ResolutionVector2D } from "../../helper/engine/resolution-vector2D";
 import { TempSprite } from "../temp-sprite";
 import { Global } from "../../helper/global";
-import { OptionPrompt } from "../../prompt/option";
-import { Vector } from "artistic-engine";
 import { JoinPrivatePrompt } from "../../prompt/join-prv";
 import { CreatePrivatePrompt } from "../../prompt/crt-prv";
+import { onClick } from "../../helper/engine/pointer-processor";
+import { MainScene } from "../../scenes/main";
 
 
 export class MainButton extends TempSprite implements IPointerListener {
+    // public get PointerRegistered(): boolean {
+    //     // return MainScene.INSTANCE.MenuState === this.assignedState;
+    // }
+
     public PointerRegistered: boolean = true;
 
     public RecieveEventsOutOfBound: boolean = false;
 
-    private pointerId: number = -1;
+    private assignedState: number = 0;
 
-    constructor(color: string, name: string, idx: number) {
+    constructor(color: string, name: string, idx: number, menuState: number) {
         super(color, name);
+        this.assignedState = menuState;
         const 
             OUTER_PAD = 70,
             INNER_GAP = 50,
@@ -32,28 +37,21 @@ export class MainButton extends TempSprite implements IPointerListener {
             1080 - LOWER_PAD - HEIGHT
         );
 
-        this.onPointer = (e: PointerEvent) => {
-            if (e.type === "pointerdown") {
-                this.pointerId = e.pointerId;
-            } else if (e.type === "pointerup") {
-                if (this.pointerId === e.pointerId) {                    
-                    switch(idx) {
-                        case 0:
-                            break;
-                        case 1:
-                            this.Parent!.attachChildren(new JoinPrivatePrompt());
-                            break;
-                        case 2:
-                            this.Parent!.attachChildren(new CreatePrivatePrompt());
-                            break;
-                        case 3:
-                            // TODO: may be exit animation etc
-                            Global.Exit();
-                    }
-                }
+        this.onPointer = onClick(() => {
+            switch(idx) {
+                case 0:
+                    break;
+                case 1:
+                        this.Parent!.attachChildren(new JoinPrivatePrompt());
+                    break;
+                case 2:
+                        this.Parent!.attachChildren(new CreatePrivatePrompt());
+                    break;
+                case 3:
+                    // TODO: may be exit animation etc
+                    Global.Exit();
             }
-            return true;
-        };
+        }, () => true);
     }
 
     public onPointer(e: PointerEvent): boolean { return false; }
