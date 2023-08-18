@@ -1,4 +1,3 @@
-import { Vector } from "artistic-engine";
 import { Prompt } from "./prompt";
 import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { Rectangle } from "artistic-engine/sprite";

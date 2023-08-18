@@ -1,5 +1,4 @@
 import { IPointerListener } from "artistic-engine/event/event_groups";
-import { ResolutionVector2D } from "../../helper/engine/resolution-vector2D";
 import { TempSprite } from "../temp-sprite";
 import { onClick } from "../../helper/engine/pointer-processor";
 import { OptionPrompt } from "../../prompt/option";

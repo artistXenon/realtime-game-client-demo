@@ -1,4 +1,3 @@
-
 interface Update<T> {
     address: string;
     from: T;

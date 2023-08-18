@@ -17,6 +17,8 @@ export class MainButton extends TempSprite implements IPointerListener {
 
     public RecieveEventsOutOfBound: boolean = false;
 
+    public onPointer: (e: PointerEvent) => boolean;
+
     private assignedState: number = 0;
 
     constructor(color: string, name: string, idx: number, menuState: number) {
@@ -67,6 +69,4 @@ export class MainButton extends TempSprite implements IPointerListener {
                 }
             }, () => true);
     }
-
-    public onPointer(e: PointerEvent): boolean { return false; }
 }

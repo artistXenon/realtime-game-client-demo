@@ -1,4 +1,4 @@
-import Maze from "./maze.js";
+import Maze from "./maze";
 
 export default class Solver {
     private maze: Maze;

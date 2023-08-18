@@ -1,6 +1,6 @@
 import { IPointerListener } from "artistic-engine/event";
 import { Sprite, TextSprite } from "artistic-engine/sprite";
-import { Engine, FontBuilder } from "artistic-engine";
+import { FontBuilder } from "artistic-engine";
 import { Modifier } from "artistic-engine/modifiers";
 import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { MainScene } from "./main";

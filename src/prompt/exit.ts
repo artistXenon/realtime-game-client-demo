@@ -6,7 +6,6 @@ import { getTextWidth } from "../helper/text";
 import { ComputedVector2D } from "../helper/engine/computed-vector2D";
 import { TempPointerSprite } from "../sprites/temp-pointer-sprite";
 import { onClick } from "../helper/engine/pointer-processor";
-import { Lobby } from "../game/lobby";
 
 export class ExitPrompt extends Prompt {
 
