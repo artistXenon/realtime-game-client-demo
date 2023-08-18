@@ -5,13 +5,19 @@ export class Lobby {
     private static lobby: Lobby = new Lobby("-1");
     
     public static createNew(id: string) {
-        this.lobby.destroy();
-        this.lobby = new Lobby(id);
+        Lobby.lobby.leave();
+        Lobby.lobby = new Lobby(id);
     }
 
+    public static get INSTANCE(): Lobby {
+        return Lobby.lobby;
+    }
+
+    private id: string;
     private lobbyState: LobbyState | undefined;
 
     private constructor(id: string) {
+        this.id = id;
         if (id === "-1") return;
         // ask for lobby state in IPC
 
@@ -25,6 +31,14 @@ export class Lobby {
         // show lobby control buttons
     }
 
+    public get ID() {
+        return this.id;
+    }
+
+    public get Players() {
+        return this.lobbyState?.players;
+    }
+
     private showLobby() {
         // TODO: load components to main scene.
         // players, states, names
@@ -32,7 +46,10 @@ export class Lobby {
     }
 
 
-    public destroy() {
+    public leave() {
+        // TODO
+        // send server we are leaving
+        // naviate to main scene with menu level 1
         // etc etc
     }
 }

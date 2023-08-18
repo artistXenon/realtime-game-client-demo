@@ -7,6 +7,7 @@ import { onClick } from "../../helper/engine/pointer-processor";
 import { MainScene } from "../../scenes/main";
 import { Vector } from "artistic-engine";
 import { ComputedVector2D } from "../../helper/engine/computed-vector2D";
+import { Lobby } from "../../game/lobby";
 
 
 export class MainButton extends TempSprite implements IPointerListener {
@@ -36,18 +37,35 @@ export class MainButton extends TempSprite implements IPointerListener {
             () => ResolutionVector2D.baseVector.Y - BOTTOM_PAD - HEIGHT
         );
 
-        this.onPointer = onClick(() => {
-            switch(idx) {
-                case 0:
-                    break;
-                case 1:
-                    this.Parent!.attachChildren(new JoinPrivatePrompt());
-                    break;
-                case 2:
-                    this.Parent!.attachChildren(new CreatePrivatePrompt());
-                    break;
-            }
-        }, () => true);
+        this.onPointer = onClick((this.assignedState === 1) ? () => {
+                switch(idx) {
+                    case 0:
+                        break;
+                    case 1:
+                        this.Parent!.attachChildren(new JoinPrivatePrompt());
+                        break;
+                    case 2:
+                        this.Parent!.attachChildren(new CreatePrivatePrompt());
+                        break;
+                }
+            } : 
+            () => {
+                // TODO
+                // leave
+                // private - invite
+                // lead - force start
+                switch(idx) {
+                    case 0:
+                        Lobby.INSTANCE.leave();
+                        break;
+                    case 1:
+                        window.navigator.clipboard.writeText(Lobby.INSTANCE.ID);
+                        break;
+                    case 2:
+                        // Global. game start
+                        break;
+                }
+            }, () => true);
     }
 
     public onPointer(e: PointerEvent): boolean { return false; }

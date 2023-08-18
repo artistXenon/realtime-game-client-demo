@@ -61,7 +61,9 @@ export class ExitPrompt extends Prompt {
             //         Lobby.createNew(detail.id);
             //         this.onDestroy();
             //     }
-            // });       
+            // });   
+
+            // TODO: if joined in lobby, do a leave before exit.
             Global.Exit();     
         }, () => true));
         this.okButton.RecieveEventsOutOfBound = false;

@@ -5,6 +5,7 @@ import { MainButton } from "../sprites/main/main-button";
 import { Global } from "../helper/global";
 import { CommonButton } from "../sprites/main/common-button";
 import { PlayerState } from "../helper/type";
+import { Lobby } from "../game/lobby";
 
 export class MainScene extends Sprite {
     private static instance: MainScene;
@@ -50,21 +51,14 @@ export class MainScene extends Sprite {
         /**
          * options o
          * exit o
-         * change character // char
          * 
          * join pub
          * join/create prv o
          * 
          * leave
-         * - lead 
-         *      kick // char
-         *      force start
-         *      add bot // empty char
+         * lead - force start
+         * private - invite
          * 
-         * - private
-         *      invite // 
-         *      change team (req to other player, accept) // char
-         *  
          */
 
         this.attachChildren([
@@ -98,7 +92,7 @@ export class MainScene extends Sprite {
     }
 
     public set MenuState(state: number) {
-        // TODO: u know what to do
+        // TODO: refresh relevenat states. 
         const currChildren = this.stateElement(this.menuState);
         const nextChildren = this.stateElement(state);
         
@@ -109,7 +103,9 @@ export class MainScene extends Sprite {
     }    
 
     public updatePlayers() {
-
+        const players = Lobby.INSTANCE.Players;
+        if (players != null) 
+            this.characters.update(players);
     }
 
     public override onDraw(context: CanvasRenderingContext2D, delay: number): void {
@@ -145,7 +141,9 @@ class Characters {
         this.sprites = [ me ];        
     }
 
-    public update(players: PlayerState[]) {
+    public update(players: PlayerState[] | undefined) {
+        // TODO
+        // if undefined, we are not in lobby. so only me.
         // must be length of 4
     }
 
