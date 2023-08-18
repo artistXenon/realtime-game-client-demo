@@ -12,6 +12,7 @@ export class CommonButton extends TempSprite implements IPointerListener {
 
     public RecieveEventsOutOfBound: boolean = false;
 
+    public onPointer: (e: PointerEvent) => boolean;
 
     constructor(color: string, name: string, idx: number) {
         super(color, name);
@@ -47,6 +48,4 @@ export class CommonButton extends TempSprite implements IPointerListener {
             }
         }, () => true);
     }
-
-    public onPointer(e: PointerEvent): boolean { return false; }
 }

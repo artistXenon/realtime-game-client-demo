@@ -6,15 +6,12 @@ import { onClick } from "../../helper/engine/pointer-processor";
 export class OptionItem extends TempSprite implements IPointerListener {
     public PointerRegistered: boolean = true;
     public RecieveEventsOutOfBound: boolean = false;
+    public onPointer: (e: PointerEvent) => boolean;
 
     private pointerId: number = -1;
 
     constructor(name: string, action: () => boolean = () => false) {
         super("orange", name);
         this.onPointer = onClick(action, () => true);
-    }
-
-    public onPointer(e: PointerEvent): boolean {  
-        return false;        
     }
 }
