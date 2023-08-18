@@ -2,6 +2,7 @@ import { Engine, FontBuilder } from "artistic-engine";
 import { PointerEventGroup } from "artistic-engine/event";
 import English from "../assets/translations/en.json";
 import { IpcRendererEvent } from "electron/renderer";
+import { LobbyState } from "./type";
 
 export class Global {
     public static Engine: Engine;
@@ -28,7 +29,7 @@ export class Global {
         // TODO: create preload interface and connect to crt-prv
     }
 
-    public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: unknown) => void) {
+    public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: LobbyState) => void) {
         (<any>window).electronIPC.getLobbyData(matchID, c);
     }
 

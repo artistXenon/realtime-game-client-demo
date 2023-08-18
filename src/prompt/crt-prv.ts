@@ -18,7 +18,6 @@ export class CreatePrivatePrompt extends Prompt {
 
     constructor() {
         super(new Rectangle());
-        
         (<Rectangle>this.window).FillStyle = "#666";
         this.window.Width = 600;       
         this.window.Height = 240;       
@@ -48,7 +47,6 @@ export class CreatePrivatePrompt extends Prompt {
             Global.JoinMatch(true, undefined, (_, success, detail: any) => {
                 if (!success) this.showError(detail.err);
                 else {
-                    console.log(detail.id);
                     Lobby.createNew(detail.id);
                     this.onDestroy();
                     window.navigator.clipboard.writeText(detail.id);
@@ -102,7 +100,6 @@ export class CreatePrivatePrompt extends Prompt {
 
     public onDestroy(): void {
         // remove from parent, remove pointer
-        console.log("destroy attempt");
         this.Parent?.detachChildren(this);
         Global.PointerEventGroup.unregisterPointerListener(this);
         Global.PointerEventGroup.unregisterPointerListener(this.createButton);

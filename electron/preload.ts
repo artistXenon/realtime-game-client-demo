@@ -9,8 +9,11 @@ contextBridge.exposeInMainWorld("electronIPC", {
     joinResult: (c: (e: IpcRendererEvent, success: boolean, err: string) => void) => ipcRenderer.once("join", c),
 
     getLobbyData: (matchID: string, c: (e: IpcRendererEvent, result: unknown) => void) => {
+        // remove all lobby-bound listeners
+        ipcRenderer.removeAllListeners("lobby:info");
+
         ipcRenderer.send("lobby:info", matchID);
-        ipcRenderer.once("lobby:info", c);
+        ipcRenderer.on("lobby:info", c);
     },
 
     onError: (c: (e: IpcRendererEvent, a: string) => void) => ipcRenderer.on("error", c),

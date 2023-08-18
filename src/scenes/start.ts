@@ -158,7 +158,7 @@ export class StartScene extends Sprite implements IPointerListener {
     private skip() {
         this.state = 3;
         // change scene to main
-        Global.Engine.Scene = new MainScene();
+        Global.Engine.Scene = MainScene.INSTANCE
     }
 
     private black() {

@@ -8,31 +8,27 @@ import { onClick } from "../../helper/engine/pointer-processor";
 import { MainScene } from "../../scenes/main";
 
 
-export class MainButton extends TempSprite implements IPointerListener {
-    public get PointerRegistered(): boolean {
-        return MainScene.INSTANCE.MenuState === this.assignedState;
-    }
+export class SubButton extends TempSprite implements IPointerListener {
+    public PointerRegistered: boolean = true;
 
     public RecieveEventsOutOfBound: boolean = false;
 
-    private assignedState: number = 0;
 
-    constructor(color: string, name: string, idx: number, menuState: number) {
+    constructor(color: string, name: string, idx: number) {
         super(color, name);
-        this.assignedState = menuState;
         const 
-            LEFT_PAD = 70,
-            INNER_GAP = 50,
-            BOTTOM_PAD = 50,
-            WIDTH = (1920 - 2 * LEFT_PAD - 3 * INNER_GAP) / 4,
-            HEIGHT = 120;
+            LEFT_PAD = 30,
+            INNER_GAP = 20,
+            TOP_PAD = 30,
+            WIDTH = 80,
+            HEIGHT = 80;
         this.Dimension = new ResolutionVector2D(
             WIDTH,
             HEIGHT
         );
         this.Position = new ResolutionVector2D(
             LEFT_PAD + idx * (WIDTH + INNER_GAP),
-            1080 - BOTTOM_PAD - HEIGHT
+            TOP_PAD
         );
 
         this.onPointer = onClick(() => {
@@ -40,14 +36,13 @@ export class MainButton extends TempSprite implements IPointerListener {
                 case 0:
                     break;
                 case 1:
-                        this.Parent!.attachChildren(new JoinPrivatePrompt());
+                    Global.Exit();
                     break;
                 case 2:
-                        this.Parent!.attachChildren(new CreatePrivatePrompt());
                     break;
                 case 3:
                     // TODO: may be exit animation etc
-                    Global.Exit();
+                    
             }
         }, () => true);
     }
