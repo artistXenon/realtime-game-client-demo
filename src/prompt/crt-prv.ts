@@ -9,7 +9,6 @@ import { onClick } from "../helper/engine/pointer-processor";
 import { Lobby } from "../game/lobby";
 
 export class CreatePrivatePrompt extends Prompt {
-    public PointerRegistered: boolean = true;
     public RecieveEventsOutOfBound: boolean = true;
 
     private createButton: TempPointerSprite;

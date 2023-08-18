@@ -7,8 +7,11 @@ import { Global } from "../helper/global";
 import { OptionItem } from "../sprites/option/option-item";
 
 export class OptionPrompt extends Prompt implements IPointerListener {
-    public PointerRegistered: boolean = true;
     public RecieveEventsOutOfBound: boolean = true;
+
+    private optionItems: OptionItem[];
+
+    private exitButton: OptionItem;
 
     constructor() {
         super(new Rectangle());
@@ -17,7 +20,7 @@ export class OptionPrompt extends Prompt implements IPointerListener {
         this.window.Position = new ResolutionVector2D(96, 54);
         this.window.Dimension = new ResolutionVector2D(1728, 972);       
 
-        const items = [
+        this.optionItems = [
             new OptionItem("option1"),
             new OptionItem("option2"),
             new OptionItem("option3"),
@@ -28,8 +31,8 @@ export class OptionPrompt extends Prompt implements IPointerListener {
             new OptionItem("option8")
         ];
         const dim = new ResolutionVector2D(819, 160);
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
+        for (let i = 0; i < this.optionItems.length; i++) {
+            const item = this.optionItems[i];
             item.Dimension = dim;
             item.Position = new ResolutionVector2D(
                 i % 2 === 0 ? 30 : 879,
@@ -39,37 +42,32 @@ export class OptionPrompt extends Prompt implements IPointerListener {
             Global.PointerEventGroup.registerPointerListener(item);
         }
 
-        const exit = new OptionItem("exit", (e: PointerEvent) => {
-            for (const item of items) {
-                Global.PointerEventGroup.unregisterPointerListener(item);
-            }
-            Global.PointerEventGroup.unregisterPointerListener(this);
-            Global.PointerEventGroup.unregisterPointerListener(exit);
-            this.Parent!.detachChildren(this);
+        this.exitButton = new OptionItem("exit", () => {
+            this.onDestroy();
             return true;
         });
-        exit.Dimension = dim;
-        exit.Position = new ResolutionVector2D(
+        this.exitButton.Dimension = dim;
+        this.exitButton.Position = new ResolutionVector2D(
             455, 790
         );
 
-        this.window.attachChildren(
-            items
-        );
-        this.window.attachChildren(exit);
+        this.window.attachChildren(this.optionItems);
+        this.window.attachChildren(this.exitButton);
         Global.PointerEventGroup.registerPointerListener(this);
-        Global.PointerEventGroup.registerPointerListener(exit);
+        Global.PointerEventGroup.registerPointerListener(this.exitButton);
         // Global.PointerEventGroup.registerPointerListener();
     }
 
-    public onPointer(e: PointerEvent): boolean {
-        return true;
-    }
+    public onDestroy(): void {
+        // remove from parent, remove pointer
+        this.Parent?.detachChildren(this);
+        Global.PointerEventGroup.unregisterPointerListener(this);
+        for (const item of this.optionItems) {
+            Global.PointerEventGroup.unregisterPointerListener(item);
+        }
+        Global.PointerEventGroup.unregisterPointerListener(this.exitButton);
 
-    public onDraw(context: CanvasRenderingContext2D, delay: number): void {
-        context.globalAlpha = 0.6;
-        context.fillStyle = "black";
-        context.fillRect(0, 0, this.W, this.H);
-        // throw new Error("Method not implemented.");
+        // WARN: dont forget to add additional elemtents
+        // TODO
     }
 }

@@ -16,7 +16,6 @@ export class JoinPublicPrompt extends Prompt {
     // READ THROUGH WHOLE FILE BEFORE USE
 
 
-    public PointerRegistered: boolean = true;
     public RecieveEventsOutOfBound: boolean = true;
 
     private joinButton: TempPointerSprite;

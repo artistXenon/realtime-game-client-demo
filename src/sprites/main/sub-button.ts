@@ -6,6 +6,7 @@ import { JoinPrivatePrompt } from "../../prompt/join-prv";
 import { CreatePrivatePrompt } from "../../prompt/crt-prv";
 import { onClick } from "../../helper/engine/pointer-processor";
 import { MainScene } from "../../scenes/main";
+import { OptionPrompt } from "../../prompt/option";
 
 
 export class SubButton extends TempSprite implements IPointerListener {
@@ -34,6 +35,7 @@ export class SubButton extends TempSprite implements IPointerListener {
         this.onPointer = onClick(() => {
             switch(idx) {
                 case 0:
+                    this.Parent!.attachChildren(new OptionPrompt());
                     break;
                 case 1:
                     Global.Exit();

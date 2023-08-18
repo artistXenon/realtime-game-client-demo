@@ -3,7 +3,9 @@ import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { IPointerListener } from "artistic-engine/event";
 
 export abstract class Prompt extends Sprite implements IPointerListener {
-    public PointerRegistered: boolean = true;
+    public get PointerRegistered() {
+        return this.Parent !== undefined;
+    }
     public RecieveEventsOutOfBound: boolean = true;
 
     protected window: Sprite;
