@@ -3,7 +3,6 @@ export type PlayerState = {
     name: string;
     team: number;
     me: boolean;
-    ready: boolean;
     leader: boolean;
     character: number;
 };

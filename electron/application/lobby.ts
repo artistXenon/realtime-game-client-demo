@@ -96,7 +96,7 @@ export class Lobby {
         for (const playerBuffer of playerBuffers) {
             const playerState = playerBuffer.readInt8();
             if ((playerState & 0b1000_0000) === 0) continue;
-            const ready = (playerState & 0b0100_0000) !== 0;
+            // const ready = (playerState & 0b0100_0000) !== 0;
             const leader = (playerState & 0b0010_0000) !== 0;
             const me = (playerState & 0b0001_0000) !== 0;
 
@@ -105,7 +105,7 @@ export class Lobby {
             const id = playerBuffer.subarray(18, 23).toString();
             const character = playerBuffer.readInt16BE(23);
             players.push({
-                id, name, team, me, ready, leader, character
+                id, name, team, me, leader, character
             });
         }
         return {

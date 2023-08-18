@@ -4,6 +4,7 @@ import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { MainButton } from "../sprites/main/main-button";
 import { Global } from "../helper/global";
 import { CommonButton } from "../sprites/main/common-button";
+import { PlayerState } from "../helper/type";
 
 export class MainScene extends Sprite {
     private static instance: MainScene;
@@ -20,7 +21,8 @@ export class MainScene extends Sprite {
     // 1: main menu. not in lobby
     // 2: lobby menu. show players and control
 
-    private characterSprites: Character[] = [];
+    private characters: Characters;
+
     private optionButton: CommonButton;
     private exitButton: CommonButton;
 
@@ -33,11 +35,7 @@ export class MainScene extends Sprite {
         super();
 
         // common
-        const char: Character = new Character("#aaa", "Main Char");
-        this.characterSprites.push(char);
-        char.Dimension = new ResolutionVector2D(200, 200);
-        char.Position = new ResolutionVector2D(960 - 100, 540 - 100);
-        
+        this.characters = new Characters();
         this.optionButton = new CommonButton("#aaa", "opt", 0);
         this.exitButton = new CommonButton("#aaa", "exit", 1);
 
@@ -50,27 +48,27 @@ export class MainScene extends Sprite {
         // this.inviteButton = new SubButton()
 
         /**
-         * options
-         * exit
-         * change character
+         * options o
+         * exit o
+         * change character // char
          * 
          * join pub
-         * join/create prv
+         * join/create prv o
          * 
          * leave
          * - lead 
-         *      kick
+         *      kick // char
          *      force start
+         *      add bot // empty char
          * 
          * - private
-         *      invite
-         *      change team (req to other player, accept)
-         *      ready/pause
+         *      invite // 
+         *      change team (req to other player, accept) // char
          *  
          */
 
         this.attachChildren([
-            char,
+            ...this.characters.Sprites,
             this.optionButton,
             this.exitButton
         ]);
@@ -110,6 +108,10 @@ export class MainScene extends Sprite {
         this.menuState = state;
     }    
 
+    public updatePlayers() {
+
+    }
+
     public override onDraw(context: CanvasRenderingContext2D, delay: number): void {
         // context.fillStyle = "black";
         // context.fillRect(0, 0, this.W, this.H);
@@ -130,3 +132,25 @@ export class MainScene extends Sprite {
         }
     }
 }
+
+class Characters {
+    private sprites: Character[];
+
+    constructor() {
+        const me = new Character("#aaa", "Main Char");
+
+        me.Dimension = new ResolutionVector2D(200, 200);
+        me.Position = new ResolutionVector2D(960 - 100, 540 - 100);
+
+        this.sprites = [ me ];        
+    }
+
+    public update(players: PlayerState[]) {
+        // must be length of 4
+    }
+
+    public get Sprites(): Character[] {
+        return this.sprites;
+    }
+}
+
