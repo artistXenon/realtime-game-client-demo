@@ -19,7 +19,7 @@ export class JoinPrivatePrompt extends Prompt {
         super(new Rectangle());
 
         (<Rectangle>this.window).FillStyle = "#666";
-        this.window.Width = 600;       
+        this.window.Width = 800;       
         this.window.Height = 240;       
         this.window.Position = new ComputedVector2D(
             () => ResolutionVector2D.reconX(960) - this.window.Width / 2,
@@ -28,8 +28,8 @@ export class JoinPrivatePrompt extends Prompt {
 
         const title = new TextSprite({ Y: 20 });        
 
-        Global.FontQuicksand.setSize("40px").setWeight("bold");
-        title.Property.font = Global.FontQuicksand.toString();
+        Global.FontVanilla.setSize("40px"); 
+        title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
         title.Text = "Click JOIN after copying code"; // TODO: clean up for translation
         const tm = getTextWidth(title.Text, title.Property.font);
@@ -37,8 +37,8 @@ export class JoinPrivatePrompt extends Prompt {
         this.window.attachChildren(title);
 
         this.errText = new TextSprite({ Y: title.Y + 60 });
-        Global.FontQuicksand.setSize("20px").setWeight("bold");
-        this.errText.Property.font = Global.FontQuicksand.toString();
+        Global.FontVanilla.setSize("20px");
+        this.errText.Property.font = Global.FontVanilla.toString();
 
         this.joinButton = new TempPointerSprite("skyblue", "", onClick(async () => {
             const code = await navigator.clipboard.readText();

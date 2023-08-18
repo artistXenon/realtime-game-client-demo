@@ -31,6 +31,7 @@ Global.PointerEventGroup.setListenSequenceFirstInFirstTrigger(false);
 assets.onLoad = () => {
     Global.FontPoppin = new FontBuilder("Poppin");
     Global.FontQuicksand = new FontBuilder("Quicksand");
+    Global.FontVanilla = new FontBuilder("Vanilla");
     setTimeout(() => scene.showAilre(), 1000);
 };
 

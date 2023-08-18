@@ -3,7 +3,7 @@ import { Character } from "../sprites/common/character";
 import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { MainButton } from "../sprites/main/main-button";
 import { Global } from "../helper/global";
-import { SubButton } from "../sprites/main/sub-button";
+import { CommonButton } from "../sprites/main/common-button";
 
 export class MainScene extends Sprite {
     private static instance: MainScene;
@@ -21,8 +21,8 @@ export class MainScene extends Sprite {
     // 2: lobby menu. show players and control
 
     private characterSprites: Character[] = [];
-    private optionButton: SubButton;
-    private exitButton: SubButton;
+    private optionButton: CommonButton;
+    private exitButton: CommonButton;
 
     private joinPubButton: MainButton;
     private joinPrvButton: MainButton;
@@ -38,16 +38,16 @@ export class MainScene extends Sprite {
         char.Dimension = new ResolutionVector2D(200, 200);
         char.Position = new ResolutionVector2D(960 - 100, 540 - 100);
         
-        this.optionButton = new SubButton("#aaa", "opt", 0);
-        this.exitButton = new SubButton("#aaa", "exit", 1);
-
-
+        this.optionButton = new CommonButton("#aaa", "opt", 0);
+        this.exitButton = new CommonButton("#aaa", "exit", 1);
 
         // menu 1
         this.joinPubButton = new MainButton("#aaa", "join pub", 0, 1);
         this.joinPrvButton = new MainButton("#aaa", "join prv", 1, 1);
         this.createPrvButton = new MainButton("#aaa", "create prv", 2, 1);
-        // this.exitButtonSprite = new MainButton("#aaa", "exit button", 3, 1); // TODO: this can be hidden / some where else
+        
+        // menu 2
+        // this.inviteButton = new SubButton()
 
         /**
          * options
@@ -55,7 +55,7 @@ export class MainScene extends Sprite {
          * change character
          * 
          * join pub
-         * join/create pub
+         * join/create prv
          * 
          * leave
          * - lead 
@@ -107,18 +107,6 @@ export class MainScene extends Sprite {
         this.detachChildren(currChildren);
         this.attachChildren(nextChildren);
 
-        // switch (state) {
-        //     case 0:
-        //     case 1: 
-        //         this.attachChildren([
-        //             this.startButtonSprite,
-        //             this.inviteButtonSprite,
-        //             this.optionButtonSprite,
-        //             this.exitButtonSprite
-        //         ]);
-        //         break;
-        //     default:
-        // }
         this.menuState = state;
     }    
 

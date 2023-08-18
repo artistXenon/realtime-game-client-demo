@@ -27,8 +27,8 @@ export class CreatePrivatePrompt extends Prompt {
 
         const title = new TextSprite();
         
-        Global.FontQuicksand.setSize("40px").setWeight("bold");
-        title.Property.font = Global.FontQuicksand.toString();
+        Global.FontVanilla.setSize("40px");
+        title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
         title.Text = "Create private lobby"; // TODO: clean up for translation
         const tm = getTextWidth(title.Text, title.Property.font);
@@ -37,8 +37,8 @@ export class CreatePrivatePrompt extends Prompt {
         this.window.attachChildren(title);
 
         this.errText = new TextSprite({ Y: title.Y + 60 });
-        Global.FontQuicksand.setSize("20px").setWeight("bold");
-        this.errText.Property.font = Global.FontQuicksand.toString();
+        Global.FontVanilla.setSize("20px");
+        this.errText.Property.font = Global.FontVanilla.toString();
 
         this.createButton = new TempPointerSprite("skyblue", "", onClick(() => {
             /* TODO: do create */

@@ -11,6 +11,7 @@ export class Global {
 
     public static FontPoppin: FontBuilder;
     public static FontQuicksand: FontBuilder;
+    public static FontVanilla: FontBuilder;
 
     public static Locale: string;
 

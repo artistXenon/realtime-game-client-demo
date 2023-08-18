@@ -8,7 +8,7 @@ import { TempPointerSprite } from "../sprites/temp-pointer-sprite";
 import { onClick } from "../helper/engine/pointer-processor";
 import { Lobby } from "../game/lobby";
 
-export class JoinPublicPrompt extends Prompt {
+export class ExitPrompt extends Prompt {
 
     // TODO:
     // NOT CONFIRMED. 
@@ -18,8 +18,8 @@ export class JoinPublicPrompt extends Prompt {
 
     public RecieveEventsOutOfBound: boolean = true;
 
-    private joinButton: TempPointerSprite;
-    private exitButton: TempPointerSprite;
+    private okButton: TempPointerSprite;
+    private cancelButton: TempPointerSprite;
     private errText: TextSprite;
 
     constructor() {
@@ -35,10 +35,10 @@ export class JoinPublicPrompt extends Prompt {
 
         const title = new TextSprite({ Y: 20 });        
 
-        Global.FontVanilla.setSize("40px");
+        Global.FontVanilla.setSize("20px");
         title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
-        title.Text = "Click JOIN after copying code"; // TODO: clean up for translation
+        title.Text = "Are you sure you want to leave the game?"; // TODO: clean up for translation
         const tm = getTextWidth(title.Text, title.Property.font);
         title.X = (this.window.W - tm.width) / 2;
         this.window.attachChildren(title);
@@ -47,42 +47,43 @@ export class JoinPublicPrompt extends Prompt {
         Global.FontVanilla.setSize("20px");
         this.errText.Property.font = Global.FontVanilla.toString();
 
-        this.joinButton = new TempPointerSprite("skyblue", "", onClick(async () => {
-            const code = await navigator.clipboard.readText();
-            const isCode = /^[a-zA-Z0-9]{5}$/.test(code);
-            if (!isCode) {
-                return this.showError("Invalid code!");
-            }
-            this.showLoading();
-            Global.JoinMatch(true, code, (_, success, detail: any) => {
-                if (!success) this.showError(detail.err);
-                else {
-                    console.log(detail.id);
-                    Lobby.createNew(detail.id);
-                    this.onDestroy();
-                }
-            });            
+        this.okButton = new TempPointerSprite("skyblue", "", onClick(async () => {
+            // const code = await navigator.clipboard.readText();
+            // const isCode = /^[a-zA-Z0-9]{5}$/.test(code);
+            // if (!isCode) {
+            //     return this.showError("Invalid code!");
+            // }
+            // this.showLoading();
+            // Global.JoinMatch(true, code, (_, success, detail: any) => {
+            //     if (!success) this.showError(detail.err);
+            //     else {
+            //         console.log(detail.id);
+            //         Lobby.createNew(detail.id);
+            //         this.onDestroy();
+            //     }
+            // });       
+            Global.Exit();     
         }, () => true));
-        this.joinButton.RecieveEventsOutOfBound = false;
-        this.joinButton.W = 150;
-        this.joinButton.H = 75;
-        this.joinButton.X = this.window.W / 2 - this.joinButton.W - 20;
-        this.joinButton.Y = this.window.H - this.joinButton.H - 20;
+        this.okButton.RecieveEventsOutOfBound = false;
+        this.okButton.W = 150;
+        this.okButton.H = 75;
+        this.okButton.X = this.window.W / 2 - this.okButton.W - 20;
+        this.okButton.Y = this.window.H - this.okButton.H - 20;
 
-        this.window.attachChildren(this.joinButton);
+        this.window.attachChildren(this.okButton);
         
-        this.exitButton = new TempPointerSprite("pink", "", onClick(() => this.onDestroy(), () => true));
-        this.exitButton.RecieveEventsOutOfBound = false;
-        this.exitButton.W = 150;
-        this.exitButton.H = 75;
-        this.exitButton.X = this.window.W / 2 + 20;
-        this.exitButton.Y = this.window.H - this.exitButton.H - 20;
+        this.cancelButton = new TempPointerSprite("pink", "", onClick(() => this.onDestroy(), () => true));
+        this.cancelButton.RecieveEventsOutOfBound = false;
+        this.cancelButton.W = 150;
+        this.cancelButton.H = 75;
+        this.cancelButton.X = this.window.W / 2 + 20;
+        this.cancelButton.Y = this.window.H - this.cancelButton.H - 20;
 
-        this.window.attachChildren(this.exitButton);
+        this.window.attachChildren(this.cancelButton);
 
         Global.PointerEventGroup.registerPointerListener(this);
-        Global.PointerEventGroup.registerPointerListener(this.joinButton);
-        Global.PointerEventGroup.registerPointerListener(this.exitButton);
+        Global.PointerEventGroup.registerPointerListener(this.okButton);
+        Global.PointerEventGroup.registerPointerListener(this.cancelButton);
         // Global.PointerEventGroup.registerPointerListener();
     }
 
@@ -112,8 +113,8 @@ export class JoinPublicPrompt extends Prompt {
         // remove from parent, remove pointer
         this.Parent?.detachChildren(this);
         Global.PointerEventGroup.unregisterPointerListener(this);
-        Global.PointerEventGroup.unregisterPointerListener(this.joinButton);
-        Global.PointerEventGroup.unregisterPointerListener(this.exitButton);
+        Global.PointerEventGroup.unregisterPointerListener(this.okButton);
+        Global.PointerEventGroup.unregisterPointerListener(this.cancelButton);
 
         // WARN: dont forget to add additional elemtents
     }
