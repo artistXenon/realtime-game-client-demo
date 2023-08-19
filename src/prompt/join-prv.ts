@@ -31,7 +31,7 @@ export class JoinPrivatePrompt extends Prompt {
         Global.FontVanilla.setSize("40px"); 
         title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
-        title.Text = "Click JOIN after copying code"; // TODO: clean up for translation
+        title.Text = () => Global.getString("join_private_lobby");
         const tm = getTextWidth(title.Text, title.Property.font);
         title.X = (this.window.W - tm.width) / 2;
         this.window.attachChildren(title);

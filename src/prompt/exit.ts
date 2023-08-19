@@ -37,7 +37,7 @@ export class ExitPrompt extends Prompt {
         Global.FontVanilla.setSize("20px");
         title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
-        title.Text = "Are you sure you want to leave the game?"; // TODO: clean up for translation
+        title.Text = () => Global.getString("exit_confirm");
         const tm = getTextWidth(title.Text, title.Property.font);
         title.X = (this.window.W - tm.width) / 2;
         this.window.attachChildren(title);
