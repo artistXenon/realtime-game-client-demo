@@ -47,7 +47,7 @@ export class OptionPrompt extends Prompt implements IPointerListener {
             Global.PointerEventGroup.registerPointerListener(item);
         }
 
-        this.exitButton = new OptionItem("exit", () => {
+        this.exitButton = new OptionItem("ok", () => {
             this.onDestroy();
             return true;
         });

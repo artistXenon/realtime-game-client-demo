@@ -5,12 +5,13 @@ import { Global } from "../../helper/global";
 
 export class OptionItem extends TempSprite implements IPointerListener {
     public get PointerRegistered() {
-        return true;
+        return this.Parent?.Parent?.Parent !== undefined;
     }
     public RecieveEventsOutOfBound: boolean = false;
     public onPointer: (e: PointerEvent) => boolean;
 
     private key: string;
+
 
     constructor(name: string, action: () => void = () => {}) {
         super("orange", Global.getString(name));
