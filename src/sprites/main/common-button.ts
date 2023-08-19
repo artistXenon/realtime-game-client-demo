@@ -22,10 +22,6 @@ export class CommonButton extends TempSprite implements IPointerListener {
             WIDTH = 50,
             HEIGHT = 50;
         this.Dimension = new Vector.Vector2D(WIDTH, HEIGHT);
-        // new ResolutionVector2D(
-        //     WIDTH,
-        //     HEIGHT
-        // );
         this.Position = new Vector.Vector2D(
             LEFT_PAD + idx * (WIDTH + INNER_GAP),
             TOP_PAD

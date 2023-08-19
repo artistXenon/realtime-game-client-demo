@@ -1,11 +1,11 @@
 import { Sprite } from "artistic-engine/sprite";
-import { Character } from "../sprites/common/character";
 import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { MainButton } from "../sprites/main/main-button";
 import { Global } from "../helper/global";
 import { CommonButton } from "../sprites/main/common-button";
 import { PlayerState } from "../helper/type";
 import { Lobby } from "../game/lobby";
+import { MainMenuPlayer } from "../sprites/main/player";
 
 export class MainScene extends Sprite {
     private static instance: MainScene;
@@ -22,7 +22,7 @@ export class MainScene extends Sprite {
     // 1: main menu. not in lobby
     // 2: lobby menu. show players and control
 
-    private characters: Characters;
+    private characters: MainMenuPlayers;
 
     private optionButton: CommonButton;
     private exitButton: CommonButton;
@@ -36,7 +36,7 @@ export class MainScene extends Sprite {
         super();
 
         // common
-        this.characters = new Characters();
+        this.characters = new MainMenuPlayers();
         this.optionButton = new CommonButton("#aaa", "opt", 0);
         this.exitButton = new CommonButton("#aaa", "exit", 1);
 
@@ -129,13 +129,12 @@ export class MainScene extends Sprite {
     }
 }
 
-class Characters {
-    private sprites: Character[];
+class MainMenuPlayers {
+    private sprites: MainMenuPlayer[];
 
     constructor() {
-        const me = new Character("#aaa", "Main Char");
+        const me = new MainMenuPlayer();
 
-        me.Dimension = new ResolutionVector2D(200, 200);
         me.Position = new ResolutionVector2D(960 - 100, 540 - 100);
 
         this.sprites = [ me ];        
@@ -147,7 +146,7 @@ class Characters {
         // must be length of 4
     }
 
-    public get Sprites(): Character[] {
+    public get Sprites(): MainMenuPlayer[] {
         return this.sprites;
     }
 }
