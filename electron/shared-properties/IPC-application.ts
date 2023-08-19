@@ -2,9 +2,11 @@ import { IpcMainEvent, app } from "electron";
 import { SharedProperties } from ".";
 import { IPCTerminal, TCPTerminal } from "../communication";
 import { Lobby } from "../application/lobby";
+import { Preferences } from "../preferences";
+import { applyPreference } from "./IPC-preference";
 
 export function apply(ipcTerminal: IPCTerminal) {
-    ipcTerminal
+    applyPreference(ipcTerminal)
         .addListener("boo", (a, b, c) => { // renderer to main
             console.log(c);
             setTimeout(() => SharedProperties.IPCTerminal.send("wah", c), 500); // main to renderer

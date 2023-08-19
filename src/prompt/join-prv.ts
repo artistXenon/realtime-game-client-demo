@@ -47,7 +47,7 @@ export class JoinPrivatePrompt extends Prompt {
                 return this.showError("Invalid code!");
             }
             this.showLoading();
-            Global.JoinMatch(true, code, (_, success, detail: any) => {
+            Global.JoinLobby(true, code, (_, success, detail: any) => {
                 if (!success) this.showError(detail.err);
                 else {
                     console.log(detail.id);

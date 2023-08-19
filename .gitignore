@@ -30,4 +30,5 @@ pnpm-lock.yaml
 yarn.lock
 
 
+config.json
 credential.json

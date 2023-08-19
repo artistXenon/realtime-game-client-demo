@@ -1,13 +1,16 @@
 import { join } from 'path';
-import { app, BrowserWindow, IpcMainEvent, Session, shell } from 'electron';
+import { app, BrowserWindow, Session, shell } from 'electron';
 
 import permissions from './permissions';
+import { Preferences } from './preferences';
 import { SharedProperties } from './shared-properties';
 
 import { GoogleCredential } from './google';
 
 process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
+
+Preferences.INSTANCE;
 
 let session: Session;
 

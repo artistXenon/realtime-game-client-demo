@@ -2,30 +2,62 @@ import fs from "fs";
 
 const config_file = "./config.json";
 
-export default class Preferences {
-    public saveLogin: boolean = true;
+export interface Config {
+    saveLogin: boolean;
+    showName: boolean;
+}
 
-    public showName: boolean = true;
-    public localName: string = "Ailre"; // TODO: replace w/ blank string later
+export class Preferences {
+    private static preferences: Preferences;
 
-    constructor() {
-        if (!fs.existsSync(config_file)) {
-            return;
+    public static get INSTANCE() {
+        if (Preferences.preferences == null) {
+            Preferences.preferences = new Preferences();
         }
-        const raw_config = fs.readFileSync(config_file, "utf8");
-        try {
-            const { saveLogin, showName, localName } = JSON.parse(raw_config);
-            this.saveLogin = saveLogin ?? true;
-            this.showName = showName ?? true;
-            this.localName = localName ?? "";
-        } catch (ignore) {
+        return Preferences.preferences;
+    }
 
+    private object: Config = {
+        saveLogin: true,
+        showName: true,
+        // localName: true// TODO: replace w/ blank string later
+    };
+
+    private constructor() {
+        let json;
+        try {
+            let raw_config;
+            if (!fs.existsSync(config_file)) {
+                raw_config = "{}";
+            } else {
+                raw_config = fs.readFileSync(config_file, "utf8");
+            }
+            json = JSON.parse(raw_config);
+        } catch (ignore) { 
+            json = {};
         }
         
+        this.Object = json;
+
+        fs.writeFileSync(config_file, JSON.stringify(this.object), "utf8");
         // todo: search local files for json config
 
     }
 
+    public get Object() {
+        return this.object;
+    }
+
+    public set Object(v: Config) {
+        const { 
+            saveLogin, 
+            showName, 
+            // localName 
+        } = v;
+        this.object.saveLogin = saveLogin ?? true;
+        this.object.showName = showName ?? true;
+        // this.object.localName = localName ?? "";
+    }
 
 
     // in pub or hidden name private match, player name will be taco 0000

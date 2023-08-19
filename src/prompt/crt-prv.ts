@@ -43,7 +43,7 @@ export class CreatePrivatePrompt extends Prompt {
         this.createButton = new TempPointerSprite("skyblue", "", onClick(() => {
             /* TODO: do create */
             this.showLoading();
-            Global.JoinMatch(true, undefined, (_, success, detail: any) => {
+            Global.JoinLobby(true, undefined, (_, success, detail: any) => {
                 if (!success) this.showError(detail.err);
                 else {
                     Lobby.createNew(detail.id);

@@ -1,14 +1,11 @@
 import { BrowserWindow, WebContents } from "electron";
 import { GoogleCredential } from "../google";
 import { IPCTerminal, UDPTerminal, TCPTerminal } from "../communication";
-import Preferences from "../preferences";
 import { Lobby } from "../application/lobby";
 import { apply } from "./IPC-application";
 
 export class SharedProperties {
   private constructor() {}
-
-  private static preferences: Preferences = new Preferences();
 
   private static googleCredential: GoogleCredential = new GoogleCredential();
 
@@ -24,10 +21,6 @@ export class SharedProperties {
 
   public static get Lobby() {
     return this.lobby;
-  }
-
-  public static get Preferences() {
-    return this.preferences;
   }
 
   public static get GoogleCredential() {

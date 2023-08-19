@@ -21,8 +21,8 @@ export class Global {
         (<any>window).electronIPC.exit(code);
     }
 
-    public static JoinMatch(isPrivate: boolean, matchID: string | undefined, onResult: (e: IpcRendererEvent, success: boolean, err: string) => void) {
-        (<any>window).electronIPC.joinMatch(isPrivate, matchID);
+    public static JoinLobby(isPrivate: boolean, lobbyID: string | undefined, onResult: (e: IpcRendererEvent, success: boolean, err: string) => void) {
+        (<any>window).electronIPC.joinLobby(isPrivate, lobbyID);
         (<any>window).electronIPC.joinResult(onResult);
     }
 
@@ -31,7 +31,8 @@ export class Global {
     }
 
     public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: LobbyState) => void) {
-        (<any>window).electronIPC.getLobbyData(matchID, c);
+        (<any>window).electronIPC.listenToLobby(c);
+        (<any>window).electronIPC.getLobbyData(matchID);
     }
 
     public static getString(key: string, ...args: string[]) {
