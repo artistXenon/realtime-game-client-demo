@@ -1,4 +1,10 @@
 {
-    "yes": "yes",
-    "loading": "Loading"
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "loading": "Loading",
+    "create_private_lobby": "Create private lobby",
+    "join_private_lobby": "Click JOIN after copying code",
+    "exit_confirm": "Are you sure you want to leave the game?"
 }

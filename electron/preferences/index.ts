@@ -5,6 +5,7 @@ const config_file = "./config.json";
 export interface Config {
     saveLogin: boolean;
     showName: boolean;
+    locale: string;
 }
 
 export class Preferences {
@@ -20,6 +21,7 @@ export class Preferences {
     private object: Config = {
         saveLogin: true,
         showName: true,
+        locale: "en"
         // localName: true// TODO: replace w/ blank string later
     };
 
@@ -52,10 +54,12 @@ export class Preferences {
         const { 
             saveLogin, 
             showName, 
+            locale
             // localName 
         } = v;
         this.object.saveLogin = saveLogin ?? true;
         this.object.showName = showName ?? true;
+        this.object.locale = locale ?? "en";
         // this.object.localName = localName ?? "";
     }
 

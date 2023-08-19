@@ -16,8 +16,6 @@ export class Global {
     public static FontQuicksand: FontBuilder;
     public static FontVanilla: FontBuilder;
 
-    public static Locale: string;
-
     private constructor() {}
 
     public static Exit(code: number = 0) {
@@ -45,11 +43,14 @@ export class Global {
         (<any>window).electronIPC.getPreference();
     }
 
+    public static updatePreferences(c: Config) {
+        (<any>window).electronIPC.updatePreference(c);
+    }
+
     public static getString(key: string, ...args: string[]) {
         let template: string;
-        switch (Global.Locale) {
-    
-            case "english": 
+        switch (this.preferences.Locale) {
+            case "en": 
             default: 
                 template = (<any>English)[key];
                 if (template === undefined) return "!ERROR!";
