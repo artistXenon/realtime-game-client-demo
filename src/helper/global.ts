@@ -3,9 +3,12 @@ import { PointerEventGroup } from "artistic-engine/event";
 import English from "../assets/translations/en.json";
 import { IpcRendererEvent } from "electron/renderer";
 import { LobbyState } from "./type";
+import { Config, Preferences } from "./preference";
 
 export class Global {
     public static Engine: Engine;
+
+    public static preferences: Preferences;
 
     public static PointerEventGroup: PointerEventGroup;
 
@@ -26,13 +29,20 @@ export class Global {
         (<any>window).electronIPC.joinResult(onResult);
     }
 
-    public static createMatch() {
-        // TODO: create preload interface and connect to crt-prv
-    }
-
     public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: LobbyState) => void) {
         (<any>window).electronIPC.listenToLobby(c);
         (<any>window).electronIPC.getLobbyData(matchID);
+    }
+
+    public static initPreferences() {
+        (<any>window).electronIPC.listenToPreference((e: IpcRendererEvent, r: Config) => {
+            if (Global.preferences == null) {
+                Global.preferences = new Preferences(r);
+            } else {
+                Global.preferences.onUpdate(r);
+            }
+        });
+        (<any>window).electronIPC.getPreference();
     }
 
     public static getString(key: string, ...args: string[]) {

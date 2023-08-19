@@ -11,6 +11,7 @@ import { Global } from './helper/global';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas')!;
 
+Global.initPreferences();
 Global.Engine = new Engine(canvas);
 
 const scene = new StartScene();
