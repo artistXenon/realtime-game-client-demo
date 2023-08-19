@@ -17,15 +17,25 @@ export class Preferences {
     public get Locale() {
         return this.config.locale;
     }
+
+    public get SaveLogin() {
+        return this.config.saveLogin;
+    }
     
     public set Locale(v: string) {
         this.config.locale = v;
+        this.doUpdate();
+    }
+    
+    public set SaveLogin(v: boolean) {
+        this.config.saveLogin = v;
         this.doUpdate();
     }
 
 
 
     public onUpdate(v: Config) {
+        this.config = v;
         console.log(v);
     }
 

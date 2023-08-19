@@ -4,6 +4,7 @@ import { Rectangle } from "artistic-engine/sprite";
 import { IPointerListener } from "artistic-engine/event";
 import { Global } from "../helper/global";
 import { OptionItem } from "../sprites/option/option-item";
+import { Preferences } from "../helper/preference";
 
 export class OptionPrompt extends Prompt implements IPointerListener {
     public RecieveEventsOutOfBound: boolean = true;
@@ -14,13 +15,18 @@ export class OptionPrompt extends Prompt implements IPointerListener {
 
     constructor() {
         super(new Rectangle());
+        Global.PointerEventGroup.registerPointerListener(this);
         
         (<Rectangle>this.window).FillStyle = "#666";
         this.window.Position = new ResolutionVector2D(96, 54);
         this.window.Dimension = new ResolutionVector2D(1728, 972);       
 
         this.optionItems = [
-            new OptionItem("option1"),
+            new OptionItem("save_login", () => {
+                console.log("blop");
+                Global.preferences.SaveLogin = !Global.preferences.SaveLogin
+                return true;
+            }),
             new OptionItem("option2"),
             new OptionItem("option3"),
             new OptionItem("option4"),
@@ -52,7 +58,6 @@ export class OptionPrompt extends Prompt implements IPointerListener {
 
         this.window.attachChildren(this.optionItems);
         this.window.attachChildren(this.exitButton);
-        Global.PointerEventGroup.registerPointerListener(this);
         Global.PointerEventGroup.registerPointerListener(this.exitButton);
         // Global.PointerEventGroup.registerPointerListener();
     }
@@ -66,7 +71,7 @@ export class OptionPrompt extends Prompt implements IPointerListener {
         }
         Global.PointerEventGroup.unregisterPointerListener(this.exitButton);
 
-        // WARN: dont forget to add additional elemtents
+        // WARN: dont forget to add additional elements
         // TODO
     }
 }

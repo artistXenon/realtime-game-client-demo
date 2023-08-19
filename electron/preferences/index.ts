@@ -55,8 +55,6 @@ export class Preferences {
         this.object.locale = locale ?? "en";
         // this.object.localName = localName ?? "";
     }
-
-
     // in pub or hidden name private match, player name will be taco 0000
     // where 0000 is last 4 digits of google ids
 
