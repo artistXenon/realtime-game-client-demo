@@ -3,11 +3,14 @@ import { GoogleCredential } from "../google";
 import { IPCTerminal, UDPTerminal, TCPTerminal } from "../communication";
 import { Lobby } from "../application/lobby";
 import { apply } from "./IPC-application";
+import { Preferences } from "../preferences";
 
 export class SharedProperties {
   private constructor() {}
 
-  private static googleCredential: GoogleCredential = new GoogleCredential();
+  private static preferences: Preferences;
+
+  private static googleCredential: GoogleCredential;
 
   public static BrowserWindow: BrowserWindow;
 
@@ -21,6 +24,10 @@ export class SharedProperties {
 
   public static get Lobby() {
     return this.lobby;
+  }
+
+  public static get Preferences() {
+    return this.preferences;
   }
 
   public static get GoogleCredential() {
@@ -54,6 +61,14 @@ export class SharedProperties {
   public static get SessionKey() {
     if (!this.googleCredential.isValidated) return undefined;
     return Buffer.from(this.googleCredential.SessionKey!);
+  }
+
+  public static set Preferences(v: Preferences) {
+    this.preferences = v;
+  }
+
+  public static set GoogleCredential(v: GoogleCredential) {
+    this.googleCredential = v;
   }
 
   public static set Lobby(lobby: Lobby) {

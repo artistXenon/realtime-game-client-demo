@@ -67,6 +67,11 @@ export class MainButton extends TempSprite implements IPointerListener {
                         // Global. game start
                         break;
                 }
-            }, () => true);
+            }, (e: PointerEvent) => {
+                if (e.type === "pointerdown") {
+                    console.log("down");
+                }
+                return true;
+            });
     }
 }

@@ -4,6 +4,8 @@ import { BrowserWindow, dialog } from "electron";
 import { machineIdSync } from "node-machine-id";
 
 import { encrypt } from "../crypto";
+import { Preferences } from "../preferences";
+import { SharedProperties } from "../shared-properties";
 
 const credential_file = "./credential.json";
 
@@ -30,16 +32,18 @@ export class GoogleCredential {
             throw new Error("GoogleCredential instance already initiated");
         }
         GoogleCredential.instance = this;
-        if (!fs.existsSync(credential_file)) {
+        if (!SharedProperties.Preferences.Object.saveLogin || !fs.existsSync(credential_file)) {
+            this.clearCredential();
             return;
         }
+
         const raw_credential = fs.readFileSync(credential_file, "utf8");
         try {
             const { id, token } = JSON.parse(raw_credential);    
             this.id = id;
             this.local_token = token;
-        } catch (ignore) {
-            fs.unlinkSync(credential_file);
+        } catch (ignore) { // credential is corrupted
+            this.clearCredential();
         }
     }
 
@@ -74,10 +78,8 @@ export class GoogleCredential {
             await this.saveNewToken(id, session_key, mid);
             return true;
         } catch (ignore) {
-            if (true) return true; // DOTO: DEV MODE ONLY
-            if (fs.existsSync(credential_file)) {
-                fs.unlinkSync(credential_file);
-            }
+            // if (true) return true; // TODO: DEV MODE ONLY
+            this.clearCredential();
             // this.app.quit();
             dialog.showMessageBox(win, {
                 title: 'Login error',
@@ -114,9 +116,18 @@ export class GoogleCredential {
         }
     }
 
+    public clearCredential() {
+        if (fs.existsSync(credential_file)) {
+            fs.unlinkSync(credential_file);
+        }
+        SharedProperties.BrowserWindow?.webContents.session.clearStorageData({ origin: "https://accounts.google.com/" });
+    }
+
     private async saveNewToken(id: string, session_key: string, machine: string) {
         const token = await encrypt(session_key, JSON.stringify({ machine, id }));
-        fs.writeFileSync(credential_file, JSON.stringify({ token, id }));
+        if (SharedProperties.Preferences.Object.saveLogin) {
+            fs.writeFileSync(credential_file, JSON.stringify({ token, id }));
+        }        
         this.local_token = token;
         this.id = id;
         this.session_key = session_key;

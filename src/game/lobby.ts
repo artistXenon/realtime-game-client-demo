@@ -1,5 +1,6 @@
 import { Global } from "../helper/global";
 import { LobbyState } from "../helper/type";
+import { MainScene } from "../scenes/main";
 
 export class Lobby {
     private static lobby: Lobby = new Lobby("-1");
@@ -22,8 +23,7 @@ export class Lobby {
         // ask for lobby state in IPC
 
         Global.GetLobbyData(id, (e, r: LobbyState) => {
-            // reused to update players state.
-            console.log(r);
+            this.onLobbyUpdate(r);
         });
 
         // show players on lobby
@@ -45,11 +45,17 @@ export class Lobby {
         // if leader, show control. (kick, give lead, switch team,)
     }
 
+    private onLobbyUpdate(r: LobbyState) {
+        console.log(r);
+        MainScene.INSTANCE.updatePlayers();
+    }
+
 
     public leave() {
         // TODO
         // send server we are leaving
         // naviate to main scene with menu level 1
         // etc etc
+        this.lobbyState = undefined;
     }
 }

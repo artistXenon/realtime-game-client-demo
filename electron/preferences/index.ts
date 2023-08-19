@@ -1,4 +1,5 @@
 import fs from "fs";
+import { SharedProperties } from "../shared-properties";
 
 const config_file = "./config.json";
 
@@ -9,15 +10,6 @@ export interface Config {
 }
 
 export class Preferences {
-    private static preferences: Preferences;
-
-    public static get INSTANCE() {
-        if (Preferences.preferences == null) {
-            Preferences.preferences = new Preferences();
-        }
-        return Preferences.preferences;
-    }
-
     private object: Config = {
         saveLogin: true,
         showName: true,
@@ -25,7 +17,7 @@ export class Preferences {
         // localName: true// TODO: replace w/ blank string later
     };
 
-    private constructor() {
+    constructor() {
         let json;
         try {
             let raw_config;
@@ -42,8 +34,6 @@ export class Preferences {
         this.Object = json;
 
         fs.writeFileSync(config_file, JSON.stringify(this.object), "utf8");
-        // todo: search local files for json config
-
     }
 
     public get Object() {
@@ -58,6 +48,9 @@ export class Preferences {
             // localName 
         } = v;
         this.object.saveLogin = saveLogin ?? true;
+        if (!this.object.saveLogin) {
+            SharedProperties.GoogleCredential?.clearCredential();
+        }
         this.object.showName = showName ?? true;
         this.object.locale = locale ?? "en";
         // this.object.localName = localName ?? "";

@@ -10,7 +10,7 @@ import { GoogleCredential } from './google';
 process.env.DIST = join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public');
 
-Preferences.INSTANCE;
+SharedProperties.Preferences = new Preferences();
 
 let session: Session;
 
@@ -26,6 +26,8 @@ app.whenReady().then(() => {
         minWidth: 1280
     });
     SharedProperties.BrowserWindow = win;
+
+    SharedProperties.GoogleCredential = new GoogleCredential();
 
     win.setMenuBarVisibility(false);
     win.setAspectRatio(16 / 9);

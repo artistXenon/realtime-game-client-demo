@@ -18,15 +18,15 @@ export abstract class Prompt extends Sprite implements IPointerListener {
     }
 
     public onPointer(e: PointerEvent): boolean {
-        if (e.type !== "pointerdown") return true;
-        const xDiff = e.x - this.window.X;
-        const yDiff = e.y - this.window.Y;
-        if (
-            xDiff < 0 || xDiff > this.window.W ||
-            yDiff < 0 || yDiff > this.window.H
-        ) {
-            this.onDestroy();
-        }
+        // if (e.type !== "pointerdown") return true;
+        // const xDiff = e.x - this.window.X;
+        // const yDiff = e.y - this.window.Y;
+        // if (
+        //     xDiff < 0 || xDiff > this.window.W ||
+        //     yDiff < 0 || yDiff > this.window.H
+        // ) {
+        //     this.onDestroy();
+        // }
         return true;
     }
 

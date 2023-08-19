@@ -5,7 +5,6 @@ import { OptionPrompt } from "../../prompt/option";
 import { ExitPrompt } from "../../prompt/exit";
 import { Vector } from "artistic-engine";
 
-
 export class CommonButton extends TempSprite implements IPointerListener {
     public PointerRegistered: boolean = true;
 

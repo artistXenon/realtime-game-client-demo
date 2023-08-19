@@ -29,7 +29,7 @@ export class Global {
 
     public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: LobbyState) => void) {
         (<any>window).electronIPC.listenToLobby(c);
-        (<any>window).electronIPC.getLobbyData(matchID);
+        (<any>window).electronIPC.getLobby(matchID);
     }
 
     public static initPreferences() {
