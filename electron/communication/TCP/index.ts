@@ -17,6 +17,7 @@ export class TCPTerminal {
     public static readonly COMMAND_CLOSE: TCPCommand = 0x00;
     public static readonly COMMAND_JOIN: TCPCommand = 0x01;
     public static readonly COMMAND_LOBBY: TCPCommand = 0x02;
+    public static readonly COMMAND_LEAVE: TCPCommand = 0x03;
     public static readonly COMMAND_CONNECT: TCPCommand = 0x04;
     public static readonly COMMAND_RECONNECT: TCPCommand = 0x05;
 
@@ -46,7 +47,7 @@ export class TCPTerminal {
             this.callbacks.set(command, callback);
             return this;
         } else {
-            console.log(call)
+            console.log(call);
             throw new Error("callback for command \'" + command + "\' is already defined");
         }
     }

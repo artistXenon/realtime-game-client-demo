@@ -3,7 +3,7 @@ import { ResolutionVector2D } from "../helper/engine/resolution-vector2D";
 import { MainButton } from "../sprites/main/main-button";
 import { Global } from "../helper/global";
 import { CommonButton } from "../sprites/main/common-button";
-import { PlayerState } from "../helper/type";
+import { PlayerState } from "../../common/types";
 import { Lobby } from "../game/lobby";
 import { MainMenuPlayer } from "../sprites/main/player";
 

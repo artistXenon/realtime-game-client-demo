@@ -1,5 +1,5 @@
 import { ResolutionVector2D } from "../../helper/engine/resolution-vector2D";
-import { PlayerState } from "../../helper/type";
+import { PlayerState } from "../../../common/types";
 import { TempSprite } from "../temp-sprite";
 
 export class MainMenuPlayer extends TempSprite {

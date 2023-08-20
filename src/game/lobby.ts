@@ -1,5 +1,5 @@
 import { Global } from "../helper/global";
-import { LobbyState } from "../helper/type";
+import { LobbyState } from "../../common/types";
 import { MainScene } from "../scenes/main";
 
 export class Lobby {

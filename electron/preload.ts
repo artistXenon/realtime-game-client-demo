@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld("electronIPC", {
     getLobby: (matchID: string) => {
         ipcRenderer.send("lobby:info", matchID);
     },
+    leaveLobby: () => {
+        ipcRenderer.send("lobby:leave");
+    },
 
     onError: (c: (e: IpcRendererEvent, a: string) => void) => ipcRenderer.on("error", c),
 

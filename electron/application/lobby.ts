@@ -3,6 +3,7 @@ import { GoogleCredential } from "../google";
 import { SharedProperties } from "../shared-properties";
 import { generateHash } from "../crypto";
 import { PingApp } from "./ping";
+import { LobbyState } from "../../common/types";
 
 const LOBBY_ID_REGEX = /^[a-zA-Z0-9]{5}$/;
 
@@ -49,7 +50,7 @@ export class Lobby {
         // this.onUpdate();
     }
 
-    public onUpdate() {
+    public onUpdate(state: LobbyState) {
         // SharedProperties.IPCTerminal.send("lobby", this);
         console.log(this);
     }
@@ -109,6 +110,8 @@ export class Lobby {
             });
         }
         return {
+            id: SharedProperties.Lobby.ID,
+            private: SharedProperties.Lobby.isPrivate,
             state, players
         };
     }

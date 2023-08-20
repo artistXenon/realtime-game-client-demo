@@ -30,12 +30,34 @@ export function apply(ipcTerminal: IPCTerminal) {
             // make join success response to renderer
         })
         .addListener("lobby:info", (event: IpcMainEvent, lobbyId: string) => {
+            // this is called only once every lobby
+                SharedProperties.TCPTerminal.listenTo(TCPTerminal.COMMAND_LOBBY, (e: Buffer) => {
+                    const obj = Lobby.parseLobbyJoin(e);
+                    // TODO: update local lobby. do i have to?
+                    SharedProperties.Lobby.onUpdate(obj);
+                    SharedProperties.IPCTerminal.send("lobby:info", obj);
+                });
+            // TODO: NO WAIT. this shouldnt be here. 
+            // update everything on Lobby class
+            // renderer will get object from Lobby class.
+            // rendere will likely not request update.
+            // Lobby class will listen to update through tcp
+            // and update throuigh IPC to renderer
+
+            // about UDP ...
+
+
             SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LOBBY, Buffer.allocUnsafe(0));
-            SharedProperties.TCPTerminal.listenTo(TCPTerminal.COMMAND_LOBBY, (e: Buffer) => {
-                const obj = Lobby.parseLobbyJoin(e);
-                // TODO: 
-                SharedProperties.IPCTerminal.send("lobby:info", obj)
-            });
+        })
+        .addListener("lobby:leave", (event: IpcMainEvent) => {
+            try {
+                SharedProperties.TCPTerminal.listenTo(TCPTerminal.COMMAND_LEAVE, (e: Buffer) => {
+                    const code = e.readInt8();
+                    // TODO: destroy local lobby
+                    SharedProperties.IPCTerminal.send("lobby:leave", code);
+                });
+            } catch (ignore) { }
+            SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LEAVE, Buffer.allocUnsafe(0));
         })
         .addListener("app:exit", (event: IpcMainEvent, code: number) => {
             console.log("browser requested exit with code: " + code);

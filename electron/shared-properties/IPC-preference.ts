@@ -1,7 +1,7 @@
 import { IpcMainEvent } from "electron";
 import { IPCTerminal } from "../communication";
 import { SharedProperties } from ".";
-import { Config, Preferences } from "../preferences";
+import { Config } from "../../common/types";
 
 export function applyPreference(ipcTerminal: IPCTerminal) {
     return ipcTerminal

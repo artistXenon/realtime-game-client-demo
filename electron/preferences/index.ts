@@ -1,18 +1,14 @@
 import fs from "fs";
 import { SharedProperties } from "../shared-properties";
+import { Config } from "../../common/types";
 
 const config_file = "./config.json";
-
-export interface Config {
-    saveLogin: boolean;
-    showName: boolean;
-    locale: string;
-}
 
 export class Preferences {
     private object: Config = {
         saveLogin: true,
         showName: true,
+        name: "",
         locale: "en"
         // localName: true// TODO: replace w/ blank string later
     };
@@ -44,6 +40,7 @@ export class Preferences {
         const { 
             saveLogin, 
             showName, 
+            name,
             locale
             // localName 
         } = v;
@@ -52,10 +49,10 @@ export class Preferences {
             SharedProperties.GoogleCredential?.clearCredential();
         }
         this.object.showName = showName ?? true;
+        this.object.name = name ?? "";
         this.object.locale = locale ?? "en";
         // this.object.localName = localName ?? "";
     }
     // in pub or hidden name private match, player name will be taco 0000
     // where 0000 is last 4 digits of google ids
-
 }

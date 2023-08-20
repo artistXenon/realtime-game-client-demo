@@ -7,7 +7,13 @@ import { ComputedVector2D } from "../helper/engine/computed-vector2D";
 import { TempPointerSprite } from "../sprites/temp-pointer-sprite";
 import { onClick } from "../helper/engine/pointer-processor";
 
-export class ExitPrompt extends Prompt {
+export class LeavePrompt extends Prompt {
+
+    // TODO:
+    // NOT LINKED
+    // 
+
+
     public RecieveEventsOutOfBound: boolean = true;
 
     private okButton: TempPointerSprite;
@@ -30,7 +36,7 @@ export class ExitPrompt extends Prompt {
         Global.FontVanilla.setSize("20px");
         title.Property.font = Global.FontVanilla.toString();
         title.Property.fill = "black";
-        title.Text = () => Global.getString("exit_confirm");
+        title.Text = () => Global.getString("leave_confirm");
         const tm = getTextWidth(title.Text, title.Property.font);
         title.X = (this.window.W - tm.width) / 2;
         this.window.attachChildren(title);
@@ -55,8 +61,8 @@ export class ExitPrompt extends Prompt {
             //     }
             // });   
 
-            // TODO: if joined in lobby, do a leave before exit.
-            Global.Exit();     
+            // TODO: perform leave on IPC
+            // then main menu to 1
         }, () => true));
         this.okButton.RecieveEventsOutOfBound = false;
         this.okButton.W = 150;

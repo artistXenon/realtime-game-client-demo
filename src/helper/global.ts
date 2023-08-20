@@ -2,7 +2,7 @@ import { Engine, FontBuilder } from "artistic-engine";
 import { PointerEventGroup } from "artistic-engine/event";
 import English from "../assets/translations/en.json";
 import { IpcRendererEvent } from "electron/renderer";
-import { LobbyState } from "./type";
+import { LobbyState } from "../../common/types";
 import { Config, Preferences } from "./preference";
 
 export class Global {
