@@ -8,6 +8,8 @@ export interface PlayerState {
 };
 
 export interface LobbyState {
+    id: string;
+    private: boolean;
     state: number;
     players: PlayerState[]
 };

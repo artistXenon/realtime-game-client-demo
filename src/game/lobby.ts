@@ -8,6 +8,7 @@ export class Lobby {
     public static createNew(id: string) {
         Lobby.lobby.leave();
         Lobby.lobby = new Lobby(id);
+        // TODO: tell main we are ready to accept lobby informations
     }
 
     public static get INSTANCE(): Lobby {
@@ -22,9 +23,13 @@ export class Lobby {
         if (id === "-1") return;
         // ask for lobby state in IPC
 
-        Global.GetLobbyData(id, (e, r: LobbyState) => {
-            this.onLobbyUpdate(r);
-        });
+        Global.ListenToLobby(
+            (e, r: LobbyState) => {
+                this.onLobbyUpdate(r);
+            }, 
+            () => {/* onLeave */}
+        );// this will also tell main we are ready
+
 
         // show players on lobby
         // hide join/create buttons
@@ -52,8 +57,10 @@ export class Lobby {
 
 
     public leave() {
+        if (this.id === "-1") return;
         // TODO
         // send server we are leaving
+        Global.LeaveLobby(this.id);
         // naviate to main scene with menu level 1
         // etc etc
         this.lobbyState = undefined;

@@ -12,16 +12,18 @@ contextBridge.exposeInMainWorld("electronIPC", {
     joinLobby: (isPrivate: boolean, matchID: string | undefined) => ipcRenderer.send("join", isPrivate, matchID),
     joinResult: (c: (e: IpcRendererEvent, success: boolean, err: string) => void) => ipcRenderer.once("join", c),
 
-    listenToLobby: (c: (e: IpcRendererEvent, result: unknown) => void) => {
+    listenToLobby: (
+        onInfo: (e: IpcRendererEvent, result: unknown) => void, 
+        onLeave: (e: IpcRendererEvent, code: number) => void) => {
         ipcRenderer.removeAllListeners("lobby:info");
-        ipcRenderer.on("lobby:info", c);
+        ipcRenderer.on("lobby:info", onInfo);
+        ipcRenderer.removeAllListeners("lobby:leave");
+        ipcRenderer.once("lobby:leave", onLeave);
+
+        ipcRenderer.send("lobby:ready");
     },
-    getLobby: (matchID: string) => {
-        ipcRenderer.send("lobby:info", matchID);
-    },
-    leaveLobby: () => {
-        ipcRenderer.send("lobby:leave");
-    },
+    getLobby: () => ipcRenderer.send("lobby:info"),
+    leaveLobby: (id: string) => ipcRenderer.send("lobby:leave", id),
 
     onError: (c: (e: IpcRendererEvent, a: string) => void) => ipcRenderer.on("error", c),
 

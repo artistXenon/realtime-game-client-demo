@@ -3,10 +3,13 @@ import { GoogleCredential } from "../google";
 import { SharedProperties } from "../shared-properties";
 import { generateHash } from "../crypto";
 import { PingApp } from "./ping";
-import { LobbyState } from "../../common/types";
+import { LobbyState, PlayerState } from "../../common/types";
+import { TCPTerminal } from "../communication";
 
 const LOBBY_ID_REGEX = /^[a-zA-Z0-9]{5}$/;
 
+const UPDATE_FLAG_INFO = 0;
+const UPDATE_FLAG_GAME = 1;
 export class Lobby {
     private id: string;
 
@@ -15,6 +18,7 @@ export class Lobby {
     private state: number = 1;
     // game state
     // players
+    private players: PlayerState[] = [];
     // teams
 
     // lobby state
@@ -28,6 +32,16 @@ export class Lobby {
         if (!isValidLobbyID) throw new Error("given lobby id is malformatted: " + id);
         this.id = id;
         this.isPrivate = prv;
+        // TODO: player 1 is me
+    }
+
+    public get StateObject() {
+        return {
+            id: this.id,
+            private: this.isPrivate,
+            state: this.state,
+            players: this.players
+        };
     }
 
     public get ID() {
@@ -39,24 +53,73 @@ export class Lobby {
     }
 
     public async join() {
-        await SharedProperties.TCPTerminal.join();
+        const result = await SharedProperties.TCPTerminal.join();
+        if (!result) {
+            return false;
+        }
         
         const ping = new PingApp();
         ping.initPing(200);
-        // TODO: // ask for lobby. wait for response
-        // SharedProperties.TCPTerminal.send(); 
-        // SharedProperties.TCPTerminal.listenTo()
-        // update lobby to renderer
-        // this.onUpdate();
+        this.attachTCPListeners(SharedProperties.TCPTerminal);
+        this.joined = true;
+        return true;
     }
 
-    public onUpdate(state: LobbyState) {
-        // SharedProperties.IPCTerminal.send("lobby", this);
-        console.log(this);
+    public onRendererReady() {
+        SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LOBBY, Buffer.allocUnsafe(0));
+    }
+
+    public onUpdate(e: Buffer, updateFlag: number) {
+        switch (updateFlag) {
+            case UPDATE_FLAG_INFO: 
+                const lobby = Lobby.parseLobbyJoin(e);
+                this.players = lobby.players;
+                this.state = lobby.state;
+                SharedProperties.IPCTerminal.send("lobby:info", lobby);
+                break;
+            default:
+        }
+    }
+
+    public destroy(id?: string) {
+        if (this.id !== id && id !== undefined) return;
+        if (this.joined) {
+            SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LEAVE, Buffer.allocUnsafe(0));
+            this.joined = false;
+        }
+        
+        SharedProperties.TCPTerminal.doDestroy();
+    }
+
+    private attachTCPListeners(t: TCPTerminal) {
+        t.listenTo(TCPTerminal.COMMAND_LOBBY, (e: Buffer) => {
+            this.onUpdate(e, UPDATE_FLAG_INFO);
+        })
+        .listenTo(TCPTerminal.COMMAND_LEAVE, (e: Buffer) => {
+            const code = e.readInt8();
+            switch (code) {
+                case 0:
+                    // we requested to leave.
+                    break;
+                case 1: 
+                    // we are kicked from lobby
+                    break;
+                case 2: 
+                    // we had connection issue
+                    break;
+            }
+            // TODO: destroy this lobby lobby
+            // SharedProperties.Lobby.Destroy()
+            // SharedProperties.Lobby = undefined;
+            SharedProperties.IPCTerminal.send("lobby:leave", code);
+        });
     }
 
     public static async GetLobby(prv: boolean, lobbyId: string) {
         try {
+            if (SharedProperties.Lobby?.ID !== lobbyId && SharedProperties.Lobby?.isJoined) {
+                SharedProperties.Lobby.destroy();
+            }
             if (!SharedProperties.GoogleCredential.isValidated) return;
             const userId = SharedProperties.GoogleCredential.ID!;
             const hashPayloads = [ userId, String(prv) ];
@@ -74,6 +137,7 @@ export class Lobby {
             if (server === undefined) return undefined;
             SharedProperties.createUDPTerminal(server, udp);
             SharedProperties.createTCPTerminal(server, tcp);
+
             return new Lobby(lobby, prv);
         } catch (e) {
             const error_code = (<any>e).response?.status;
@@ -85,7 +149,7 @@ export class Lobby {
         }
     }
 
-    public static parseLobbyJoin(b: Buffer) {
+    private static parseLobbyJoin(b: Buffer): LobbyState {
         const state = b.readInt8();
         const playerBuffers = [
             b.subarray(1, 26),

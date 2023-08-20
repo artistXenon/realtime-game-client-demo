@@ -29,7 +29,7 @@ export class TCPTerminal {
 
     private isConnected: boolean = false;
 
-    private doReconnect: boolean = true;
+    private doReconnect: boolean = false; // TODO: this will stay false before stable release
 
     private firstReconnect: number = 0;
 
@@ -47,7 +47,6 @@ export class TCPTerminal {
             this.callbacks.set(command, callback);
             return this;
         } else {
-            console.log(call);
             throw new Error("callback for command \'" + command + "\' is already defined");
         }
     }
@@ -68,14 +67,14 @@ export class TCPTerminal {
         this.connection.write(bodyBuffer);
     }
 
-    public async join(reconnect: boolean = false) {             
+    public async join(reconnect: boolean = false): Promise<boolean> {             
         let command: number;
         if (reconnect) {
             if (this.firstReconnect === 0) {
                 this.firstReconnect = Date.now();
             } else if (Date.now() - this.firstReconnect > 10000){
                 this.firstReconnect = 0;
-                return;
+                return false;
             }
             command = TCPTerminal.COMMAND_RECONNECT;
         } else {
@@ -83,14 +82,21 @@ export class TCPTerminal {
         }        
 
         if (!this.isConnected) {
-            await new Promise<void>((res, rej) => {
+            const start = Date.now();
+            const success = await new Promise<boolean>((res, rej) => {
                 const itv = setInterval(_ => {
                     if (this.isConnected) {
                         clearInterval(itv);
-                        res();
+                        res(true);
+                    } else if (Date.now() - start > 10000) {
+                        clearInterval(itv);1
+                        res(false);
                     }
                 }, 10);
             });    
+            if (!success) {
+                return false;
+            }
         }
 
         if (!SharedProperties.GoogleCredential.isValidated) {
@@ -129,6 +135,12 @@ export class TCPTerminal {
         }, true);
 
         return this.connection.write(messageBuffer);
+    }
+
+    public doDestroy() {
+        this.destroy = this.connection;
+        this.connection.unref();
+        this.connection.destroy();
     }
 
     private createConnection(address: string, port: number): net.Socket {

@@ -2,8 +2,8 @@ import { Engine, FontBuilder } from "artistic-engine";
 import { PointerEventGroup } from "artistic-engine/event";
 import English from "../assets/translations/en.json";
 import { IpcRendererEvent } from "electron/renderer";
-import { LobbyState } from "../../common/types";
-import { Config, Preferences } from "./preference";
+import { Config, LobbyState } from "../../common/types";
+import { Preferences } from "./preference";
 
 export class Global {
     public static Engine: Engine;
@@ -23,13 +23,22 @@ export class Global {
     }
 
     public static JoinLobby(isPrivate: boolean, lobbyID: string | undefined, onResult: (e: IpcRendererEvent, success: boolean, err: string) => void) {
-        (<any>window).electronIPC.joinLobby(isPrivate, lobbyID);
         (<any>window).electronIPC.joinResult(onResult);
+        (<any>window).electronIPC.joinLobby(isPrivate, lobbyID);
     }
 
-    public static GetLobbyData(matchID: string, c: (e: IpcRendererEvent, result: LobbyState) => void) {
-        (<any>window).electronIPC.listenToLobby(c);
-        (<any>window).electronIPC.getLobby(matchID);
+    public static ListenToLobby(
+        onInfo: (e: IpcRendererEvent, result: LobbyState) => void,
+        onLeave: (e: IpcRendererEvent, code: number) => void) {
+        (<any>window).electronIPC.listenToLobby(onInfo, onLeave);
+    }
+
+    public static GetLobbyData() {
+        (<any>window).electronIPC.getLobby();
+    }
+
+    public static LeaveLobby(id: string) {
+        (<any>window).electronIPC.leaveLobby(id);
     }
 
     public static initPreferences() {

@@ -1,8 +1,7 @@
 import { IpcMainEvent, app } from "electron";
 import { SharedProperties } from ".";
-import { IPCTerminal, TCPTerminal } from "../communication";
+import { IPCTerminal } from "../communication";
 import { Lobby } from "../application/lobby";
-import { Preferences } from "../preferences";
 import { applyPreference } from "./IPC-preference";
 
 export function apply(ipcTerminal: IPCTerminal) {
@@ -23,21 +22,25 @@ export function apply(ipcTerminal: IPCTerminal) {
                 return;
             }
             SharedProperties.Lobby = lobby; 
-            await lobby.join();
-            SharedProperties.IPCTerminal.send("join", true, {
-                id: SharedProperties.Lobby.ID
-            });
+            const result = await lobby.join();
+            if (result) {
+                SharedProperties.IPCTerminal.send("join", result, 
+                result ? {
+                    id: SharedProperties.Lobby.ID
+                } : {
+                    err: (isPrivate && lobbyID === "") ? "can not create lobby" : "can not join lobby"
+                });
+            }
             // make join success response to renderer
         })
-        .addListener("lobby:info", (event: IpcMainEvent, lobbyId: string) => {
+        .addListener("lobby:ready", (event: IpcMainEvent) => {
+            SharedProperties.Lobby.onRendererReady();
+        })
+        .addListener("lobby:info", (event: IpcMainEvent) => {
             // this is called only once every lobby
-                SharedProperties.TCPTerminal.listenTo(TCPTerminal.COMMAND_LOBBY, (e: Buffer) => {
-                    const obj = Lobby.parseLobbyJoin(e);
-                    // TODO: update local lobby. do i have to?
-                    SharedProperties.Lobby.onUpdate(obj);
-                    SharedProperties.IPCTerminal.send("lobby:info", obj);
-                });
-            // TODO: NO WAIT. this shouldnt be here. 
+            // TODO: replace with local fetch. send is handled internally
+            SharedProperties.IPCTerminal.send("lobby:info", SharedProperties.Lobby.StateObject);
+            // TODO: NO WAIT.
             // update everything on Lobby class
             // renderer will get object from Lobby class.
             // rendere will likely not request update.
@@ -45,21 +48,12 @@ export function apply(ipcTerminal: IPCTerminal) {
             // and update throuigh IPC to renderer
 
             // about UDP ...
-
-
-            SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LOBBY, Buffer.allocUnsafe(0));
         })
-        .addListener("lobby:leave", (event: IpcMainEvent) => {
-            try {
-                SharedProperties.TCPTerminal.listenTo(TCPTerminal.COMMAND_LEAVE, (e: Buffer) => {
-                    const code = e.readInt8();
-                    // TODO: destroy local lobby
-                    SharedProperties.IPCTerminal.send("lobby:leave", code);
-                });
-            } catch (ignore) { }
-            SharedProperties.TCPTerminal.send(TCPTerminal.COMMAND_LEAVE, Buffer.allocUnsafe(0));
+        .addListener("lobby:leave", (event: IpcMainEvent, id: string) => {
+            SharedProperties.Lobby.destroy(id);
         })
         .addListener("app:exit", (event: IpcMainEvent, code: number) => {
+            SharedProperties.Lobby.destroy();
             console.log("browser requested exit with code: " + code);
             app.quit();
         });
