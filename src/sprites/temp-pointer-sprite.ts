@@ -1,4 +1,4 @@
-import { IPointerListener } from "artistic-engine/event/event_groups";
+import { IPointerListener } from "artistic-engine/event";
 import { Sprite } from "artistic-engine/sprite";
 
 export class TempPointerSprite extends Sprite implements IPointerListener {

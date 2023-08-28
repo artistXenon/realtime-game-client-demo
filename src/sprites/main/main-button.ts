@@ -1,4 +1,4 @@
-import { IPointerListener } from "artistic-engine/event/event_groups";
+import { IPointerListener } from "artistic-engine/event";
 import { ResolutionVector2D } from "../../helper/engine/resolution-vector2D";
 import { TempSprite } from "../temp-sprite";
 import { JoinPrivatePrompt } from "../../prompt/join-prv";

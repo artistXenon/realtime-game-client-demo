@@ -1,4 +1,4 @@
-import { IPointerListener } from "artistic-engine/event/event_groups";
+import { IPointerListener } from "artistic-engine/event";
 import { TempSprite } from "../temp-sprite";
 import { onClick } from "../../helper/engine/pointer-processor";
 import { Global } from "../../helper/global";

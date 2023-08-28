@@ -3,7 +3,7 @@ import poppin from "../assets/fonts/Poppin.woff2"
 import quicksand from "../assets/fonts/Quicksand.woff2"
 import vanillaExtractRegular from "../assets/fonts/VanillaExtractRegular.ttf"
 
-import AssetLoader from "artistic-engine/loader/asset_loader";
+import { AssetLoader } from "artistic-engine/loader";
 
 export class EngineAssets {
     private assetLoader: AssetLoader;
